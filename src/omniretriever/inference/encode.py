@@ -18,7 +18,7 @@ from typing import Sequence
 import torch
 import torch.nn.functional as F
 
-from omniretriever.data.media import load_audio_waveform, load_video_frames
+from omniretriever.data.media import load_audio_waveform, load_video_frames, video_sample_fps
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +39,13 @@ def encode_text(backbone, processor, text, config):
 def encode_video(backbone, processor, video_path, config):
     """Encode video file(s) using the visual stream only."""
     paths = _as_list(video_path)
-    frames = [load_video_frames(p, num_frames=config.video_max_frames,
-                                resolution=config.video_resolution) for p in paths]
+    frames = _frames(paths, config)
     suffix = _instruction(config, "video") + _turn_end(processor, config)
     prompts = [_video_prompt(processor, suffix)] * len(paths)
     inputs = processor(
         text=prompts,
         videos=frames,
-        **_video_kwargs(config),
+        **_video_kwargs(config, paths),
         padding=True,
         return_tensors="pt",
     ).to(_device(backbone))
@@ -56,9 +55,7 @@ def encode_video(backbone, processor, video_path, config):
 def encode_audio(backbone, processor, audio_path, config):
     """Encode audio file(s) using the audio stream only."""
     paths = _as_list(audio_path)
-    waveforms = [load_audio_waveform(p,
-                                     duration_sec=config.audio_duration_sec,
-                                     sample_rate=config.audio_sample_rate) for p in paths]
+    waveforms = _waveforms(paths, config)
     suffix = _instruction(config, "audio") + _turn_end(processor, config)
     prompts = [_audio_prompt(processor, suffix)] * len(paths)
     inputs = processor(
@@ -77,11 +74,8 @@ def encode_audio(backbone, processor, audio_path, config):
 def encode_av(backbone, processor, clip_path, config):
     """Encode multimodal clip(s) using both visual and audio streams."""
     paths = _as_list(clip_path)
-    frames = [load_video_frames(p, num_frames=config.video_max_frames,
-                                resolution=config.video_resolution) for p in paths]
-    waveforms = [load_audio_waveform(p,
-                                     duration_sec=config.audio_duration_sec,
-                                     sample_rate=config.audio_sample_rate) for p in paths]
+    frames = _frames(paths, config)
+    waveforms = _waveforms(paths, config)
     # With use_audio_in_video the processor rewrites the plain video placeholder
     # into interleaved video/audio chunks itself, so the prompt stays the
     # video-only one and must not carry a separate audio placeholder.
@@ -100,7 +94,7 @@ def encode_av(backbone, processor, clip_path, config):
         videos=frames,
         audio=waveforms,
         sampling_rate=config.audio_sample_rate,
-        **_video_kwargs(config),
+        **_video_kwargs(config, paths, use_audio_in_video=True),
         use_audio_in_video=True,
         padding=True,
         return_tensors="pt",
@@ -149,14 +143,13 @@ def encode_tv(backbone, processor, video_path, text, config):
         Tensor of shape ``(N, D)``.
     """
     paths, texts = _pair(video_path, text, "video_path", "text")
-    frames = [load_video_frames(p, num_frames=config.video_max_frames,
-                                resolution=config.video_resolution) for p in paths]
+    frames = _frames(paths, config)
     end = _turn_end(processor, config)
     prompts = [_video_prompt(processor, t + end) for t in texts]
     inputs = processor(
         text=prompts,
         videos=frames,
-        **_video_kwargs(config),
+        **_video_kwargs(config, paths),
         padding=True,
         return_tensors="pt",
     ).to(_device(backbone))
@@ -174,9 +167,7 @@ def encode_at(backbone, processor, audio_path, text, config):
         Tensor of shape ``(N, D)``.
     """
     paths, texts = _pair(audio_path, text, "audio_path", "text")
-    waveforms = [load_audio_waveform(p,
-                                     duration_sec=config.audio_duration_sec,
-                                     sample_rate=config.audio_sample_rate) for p in paths]
+    waveforms = _waveforms(paths, config)
     end = _turn_end(processor, config)
     prompts = [_audio_prompt(processor, t + end) for t in texts]
     inputs = processor(
@@ -292,33 +283,52 @@ def _audio_prompt(processor, suffix: str = "") -> str:
     return processor.audio_bos_token + processor.audio_token + processor.audio_eos_token + suffix
 
 
-_MIN_PIXELS = 3136
+def _frames(paths, config) -> list:
+    """Sampled frames of every clip, as ``load_video_frames`` returns them."""
+    return [load_video_frames(p, num_frames=config.video_max_frames,
+                              resolution=config.video_resolution,
+                              center_crop=config.video_center_crop) for p in paths]
 
 
-def _video_kwargs(config) -> dict:
-    """Processor kwargs controlling the visual token budget.
+def _waveforms(paths, config) -> list:
+    """Fixed-duration waveform of every clip."""
+    return [load_audio_waveform(p, duration_sec=config.audio_duration_sec,
+                                sample_rate=config.audio_sample_rate,
+                                crop=config.audio_crop) for p in paths]
 
-    Empty by default, which leaves the processor on the pixel budget WAVE-7B
-    ships: ``min_pixels = 128 * 28 * 28``. That floor is 100352 pixels, so a
-    224 px frame (50176) is rescaled up to 336 px and an 8-frame clip becomes
-    576 language-model tokens rather than 256.
 
-    That rescale looks like a bug against Table S2 of the paper, which puts a
-    video-only forward at about 268 tokens, i.e. 256 visual tokens plus the
-    placeholder pair and the filler. It is not: the same floor appears in the
-    ``processing_qwen2_5_omni.py`` the model directory ships and in the
-    ``transformers`` build of it, so 336 px is the released configuration and
-    the paper's number is the outlier. Pinning the budget measurably hurt, too:
-    on a 300-record run it cost ``v2t`` 0.087 R@1 while leaving ``t2v`` flat.
+def _video_kwargs(config, paths=(), use_audio_in_video: bool = False) -> dict:
+    """Processor kwargs: the visual token budget and the clip's sampling rate.
 
-    Set ``InferenceConfig.pin_video_resolution`` to override the floor and hold
-    frames at ``video_resolution``. ``max_pixels`` is ignored by this processor
-    version; only a ``size`` dict takes effect.
+    Training (``training/train.sh``) pins every frame at ``min_pixels =
+    max_pixels = 224 * 224`` and gives the processor full frames, so the aspect
+    ratio is kept and an 8-frame clip is about 256 tokens. Without a ``size``
+    dict the processor uses its own range, which rescales a 224 px crop up to
+    336 px (576 tokens) and leaves full-size frames at ~2300 tokens.
+    ``pin_video_resolution`` holds frames at ``video_resolution ** 2`` pixels;
+    the default 336 px scored best on 300 records. ``max_pixels`` is ignored by
+    this processor version; only a ``size`` dict takes effect.
+
+    With ``video_clip_fps`` the processor also gets the clip's real sampling
+    rate and, on the ``av`` path, the training ``seconds_per_chunk``.
     """
-    if not config.pin_video_resolution:
-        return {}
-    edge = config.video_resolution
-    return {"size": {"shortest_edge": _MIN_PIXELS, "longest_edge": edge * edge}}
+    kwargs = {}
+    if config.pin_video_resolution:
+        # min_pixels = max_pixels, as train.sh sets them
+        pixels = config.video_resolution * config.video_resolution
+        kwargs["size"] = {"shortest_edge": pixels, "longest_edge": pixels}
+    if config.video_clip_fps and paths:
+        # ADDED downstream: the clip's real sampling rate, as training passes it
+        # (data_qwen.py::video_decord), instead of the processor's 2 fps.
+        # The transformers processor takes one fps for the whole batch
+        fps = {video_sample_fps(p, num_frames=config.video_max_frames) for p in paths}
+        if len(fps) > 1:
+            raise ValueError("video_clip_fps needs one clip per batch (or clips of one fps).")
+        kwargs["fps"] = fps.pop()
+        if use_audio_in_video:
+            # Training: seconds_per_chunk = 2 * second_per_grid, second_per_grid = 2 / fps
+            kwargs["seconds_per_chunk"] = 2.0 * 2.0 / kwargs["fps"]
+    return kwargs
 
 
 def _apply_beats_audio_slots(inputs, processor, backbone, config):

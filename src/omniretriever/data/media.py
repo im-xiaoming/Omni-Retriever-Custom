@@ -53,6 +53,7 @@ def load_video_frames(
     num_frames: int = 8,
     resolution: int = 224,
     sampling: str = "uniform",
+    center_crop: bool = True,
 ) -> np.ndarray:
     """Load ``num_frames`` frames from a video as a ``(N, H, W, 3)`` ``uint8`` array.
 
@@ -62,10 +63,13 @@ def load_video_frames(
         resolution: target square resolution for each frame.
         sampling: ``"uniform"`` (default, evenly spaced) or ``"random"`` for a
             random subset of ``num_frames`` frames.
+        center_crop: centre-crop and resize to ``resolution``. With ``False``
+            the frames come back at full size, as training hands them to the
+            processor, and ``resolution`` is ignored.
 
     Returns:
-        A NumPy array of shape ``(num_frames, resolution, resolution, 3)``,
-        ``dtype=uint8``, RGB.
+        A NumPy array of shape ``(num_frames, resolution, resolution, 3)``
+        (full frame size without ``center_crop``), ``dtype=uint8``, RGB.
 
     Note:
         CHANGED downstream. The released code decoded with ``decord``, which
@@ -89,14 +93,32 @@ def load_video_frames(
         benchmark's p99 clip is 16 s, which is comfortable; very long inputs
         would not be.
     """
+    frames, _ = _sample_video(str(path), num_frames, sampling)
+    return _resize_frames(frames, resolution) if center_crop else frames
+
+
+def video_sample_fps(path: str | os.PathLike, *, num_frames: int = 8,
+                     sampling: str = "uniform") -> float:
+    """Rate at which :func:`load_video_frames` samples the clip, frames per second.
+
+    ADDED downstream. Training computes it as ``num_frames / duration`` with
+    ``duration = decoded frames / average frame rate`` and passes it to the
+    processor (``data_qwen.py::video_decord``); shares the decode cache.
+    """
+    return _sample_video(str(path), num_frames, sampling)[1]
+
+
+@functools.lru_cache(maxsize=VIDEO_CACHE_SIZE)
+def _sample_video(path: str, num_frames: int, sampling: str) -> tuple[np.ndarray, float]:
+    """Decode ``path`` and return its sampled full-size frames and the sampling fps."""
     import av
 
-    path = str(path)
     with av.open(path) as container:
         if not container.streams.video:
             raise RuntimeError(f"{path!r} contains no video stream.")
         stream = container.streams.video[0]
         stream.thread_type = "AUTO"
+        rate = float(stream.average_rate or stream.guessed_rate or 0)
         frames = [frame.to_ndarray(format="rgb24") for frame in container.decode(stream)]
 
     total = len(frames)
@@ -112,7 +134,8 @@ def load_video_frames(
     else:
         raise ValueError(f"Unknown sampling strategy: {sampling!r}")
 
-    return _resize_frames(np.stack([frames[i] for i in idx]), resolution)
+    duration = total / rate if rate > 0 else float(total)
+    return np.stack([frames[i] for i in idx]), len(idx) / duration
 
 
 def _resize_frames(frames: np.ndarray, resolution: int) -> np.ndarray:
@@ -144,6 +167,7 @@ def load_audio_waveform(
     duration_sec: int = 8,
     sample_rate: int = 16_000,
     pad_mode: str = "zero",
+    crop: str = "centre",
 ) -> np.ndarray:
     """Load a fixed-duration mono waveform from a video or audio container.
 
@@ -151,11 +175,13 @@ def load_audio_waveform(
         path: path to the source file. Video containers (``.mp4``, ``.mov``,
             ``.webm``) are decoded for their audio track; pure audio files
             (``.wav``, ``.flac``, ``.mp3``) are loaded directly.
-        duration_sec: target duration in seconds. Longer waveforms are centre-
-            cropped, shorter ones are padded (see ``pad_mode``).
+        duration_sec: target duration in seconds. Longer waveforms are cropped
+            (see ``crop``), shorter ones are padded (see ``pad_mode``).
         sample_rate: target sample rate (Hz).
         pad_mode: how to pad short clips. One of ``"zero"`` (silence) or
             ``"loop"`` (repeat the source until it fills the window).
+        crop: ``"centre"`` or ``"start"`` (keep the first ``duration_sec``
+            seconds, as training does).
 
     Returns:
         A NumPy array of shape ``(duration_sec * sample_rate,)``, ``dtype=float32``.
@@ -166,8 +192,9 @@ def load_audio_waveform(
     waveform = np.asarray(_decode_waveform(path, sample_rate), dtype=np.float32)
 
     if waveform.shape[0] >= target_len:
-        # Centre crop.
-        start = (waveform.shape[0] - target_len) // 2
+        if crop not in ("centre", "start"):
+            raise ValueError(f"Unknown crop: {crop!r}")
+        start = (waveform.shape[0] - target_len) // 2 if crop == "centre" else 0
         return waveform[start:start + target_len]
 
     # Pad.
