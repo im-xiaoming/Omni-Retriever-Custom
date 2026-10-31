@@ -231,10 +231,12 @@ def _warm(key: tuple[str, str], config) -> None:
     try:
         if kind == "video":
             load_video_frames(path, num_frames=config.video_max_frames,
-                              resolution=config.video_resolution)
+                              resolution=config.video_resolution,
+                              center_crop=config.video_center_crop)
         else:
             load_audio_waveform(path, duration_sec=config.audio_duration_sec,
-                                sample_rate=config.audio_sample_rate)
+                                sample_rate=config.audio_sample_rate,
+                                crop=config.audio_crop)
     except Exception:  # noqa: BLE001 - the encode call re-raises with context
         pass
 
@@ -370,13 +372,13 @@ def _build_extract_parser() -> argparse.ArgumentParser:
         ),
     )
     parser.add_argument(
-        "--pin-video-resolution",
-        action="store_true",
+        "--no-pin-video-resolution",
+        dest="pin_video_resolution",
+        action="store_false",
         help=(
-            "Hold frames at --video-resolution instead of the pixel floor WAVE-7B ships, which "
-            "rescales 224 px up to 336 px (576 visual tokens rather than 256). Off by default: "
-            "the floor is the released configuration, and pinning cost v2t 0.087 R@1 on a "
-            "300-record run. Use it only to A/B."
+            "Let the processor pick the frame size instead of holding frames at 336 x 336 "
+            "pixels (576 visual tokens). Full-size frames then reach ~2300 tokens and the run "
+            "is 8x slower. Use it only to A/B."
         ),
     )
     parser.add_argument(

@@ -13,7 +13,8 @@ The model is the WAVE-7B backbone (Qwen2.5-Omni + BEATs) with the OmniRetriever 
 | Video decoded with PyAV instead of decord (decord hangs on many clips). Frame counts differ, so do not mix vectors from the two | `data/media.py` |
 | Audio falls back to PyAV when librosa cannot read the track; decoded clips are cached | `data/media.py` |
 | Prompts end with `<|im_end|>` as in training (the head reads the last position) | `inference/encode.py` |
-| Audio placeholder doubled for the interleaved BEATs vectors, as in training | `inference/encode.py` |
+| Filler prompt on the audio and av paths; option to double the audio slots for BEATs (off: it scores lower) | `inference/encode.py` |
+| Frames as in training: aspect ratio kept, the clip's real fps (sets the video time steps and the audio chunks of `av`), first 8 s of audio; frames held at 336² px | `data/media.py`, `inference/encode.py` |
 | Dual-modal encoders `encode_tv` (video+text) and `encode_at` (audio+text) | `inference/encode.py`, `models/loader.py` |
 | BEATs weights checked after loading, standalone checkpoint as fallback | `models/beats_adaptor.py` |
 | CLI: all modalities in one pass, batching, prefetch, resume from `OUTPUT.partial.npz` | `cli.py` |
@@ -52,7 +53,23 @@ a  = model.encode_audio(['clip.mp4'])                       # audio only
 print(av @ t.T)                                             # cosine: vectors are normalised
 ```
 
-Text can be batched; media one clip per call.
+Text can be batched; media one clip per call. The defaults are in `InferenceConfig` (`models/loader.py`).
+
+## Inference settings
+
+R@1 on 300 OmniRetriever-Bench records (gallery 300, so higher than the paper's 3782-item numbers), all 12
+directions averaged:
+
+| Setting | AVG-all R@1 |
+|---|---|
+| previous defaults (centre crop, processor frame size, 2 fps, centre audio) | 0.607 |
+| as training (crop off, 224² px, clip fps, first 8 s audio, doubled audio, video filler) | 0.623 |
+| ... without doubled audio | 0.641 |
+| ... with centre crop | 0.609 |
+| ... with 2 fps | 0.599 |
+| ... with centre audio | 0.620 |
+| ... without video filler | 0.633 |
+| **current defaults**: as training, no doubled audio, no video filler, 336² px | **0.656** |
 
 ## CLI
 

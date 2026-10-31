@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 # Default inference settings (match paper §3.5 and Appendix A).
 DEFAULT_VIDEO_FRAMES = 8
-DEFAULT_VIDEO_RESOLUTION = 224
+DEFAULT_VIDEO_RESOLUTION = 336
 DEFAULT_AUDIO_DURATION_SEC = 8
 DEFAULT_AUDIO_SAMPLE_RATE = 16_000
 DEFAULT_EMBED_DIM = 3584
@@ -46,24 +46,27 @@ class InferenceConfig:
 
     Attributes:
         video_max_frames: number of frames sampled per video (default 8).
-        video_resolution: square pixel size each frame is resized to.
-        audio_duration_sec: fixed-duration audio crop (centred).
+        video_resolution: frames are held at ``video_resolution ** 2`` pixels
+            (aspect ratio kept unless ``video_center_crop``).
+        audio_duration_sec: fixed-duration audio crop (see ``audio_crop``).
         audio_sample_rate: target audio sample rate (Hz).
         embed_dim: dimensionality of the output embedding.
         normalize: whether to L2-normalize the output embedding.
         precision: numerical precision (one of ``"float32"``, ``"bfloat16"``,
             ``"float16"``).
-        pin_video_resolution: whether to hold frames at ``video_resolution``
-            instead of the pixel floor WAVE-7B ships, which rescales 224 px up
-            to 336 px (576 visual tokens rather than 256). Off by default: the
-            floor is the released configuration, and pinning cost ``v2t`` 0.087
-            R@1 on a 300-record run. See
+        pin_video_resolution: whether to hold frames at ``video_resolution ** 2``
+            pixels (``min_pixels = max_pixels``, as ``training/train.sh``)
+            instead of the processor's own range (128 to 768 tokens per 28 px
+            patch grid). On by default: unpinned, full-size frames reach about
+            2300 visual tokens and the run is 8x slower. Training pins 224 px
+            (256 tokens); 336 px (576 tokens) scored 0.020 AVG-all R@1 higher on
+            300 records at the same speed as the old default. See
             ``omniretriever.inference.encode._video_kwargs``.
         append_turn_end: whether to close each prompt with the tokeniser's
             ``<|im_end|>``, as the training pipeline does. Added downstream; the
             fusion head pools a fixed final position, so without it the
-            embedding is read out of a different token for every modality. Not
-            applied on the ``av`` path, which cannot take a trailing token. See
+            embedding is read out of a different token for every modality. The
+            ``av`` path needs ``scripts/patch_wave_rope.py`` for it. See
             ``omniretriever.inference.encode._turn_end``.
         media_instruction: filler placed next to a media placeholder when the
             combination carries no caption. Added downstream to match the
@@ -76,13 +79,30 @@ class InferenceConfig:
             ``v2at`` 0.077 for a 0.013 gain on ``t2v``. So ``video`` is out by
             default and ``audio`` is in. ``av`` carries both streams, so neither
             contrast covers it; it keeps the filler until someone measures it.
+            Re-measured with the training frame layout and fps (300 records):
+            the video filler still loses, 0.623 vs 0.633 AVG-all.
         duplicate_audio_tokens: whether to give each audio frame the second
             token slot the interleaved BEATs branch fills. Added downstream and
             defaulted **off**: Table S2 of the paper puts the joint AV forward
             at about 470 tokens, which the undoubled layout matches (465) and
             the doubled one does not (665). A 300-record A/B moved AVG-all by
-            +0.004 R@1, i.e. nothing. See
+            +0.004 R@1, i.e. nothing. Re-measured with the training frame layout
+            and fps: doubling lost 0.018 AVG-all (0.623 vs 0.641). See
             ``omniretriever.inference.encode._apply_beats_audio_slots``.
+        video_center_crop: whether frames are centre-cropped to a square before
+            the processor sees them. Training (``data_qwen.py::video_decord``)
+            hands the processor full frames, which keeps the aspect ratio. Off by
+            default: cropping lost 0.014 AVG-all R@1 on 300 records.
+        video_clip_fps: whether the processor is told the real sampling rate of
+            the clip, ``num_frames / duration``, as training does, instead of
+            its default 2 fps. It sets the M-RoPE time step of every video token
+            and, on the ``av`` path, how audio is chunked between the frames
+            (training uses ``seconds_per_chunk = 2 * second_per_grid``). On by
+            default: the 2 fps default lost 0.024 AVG-all R@1 on 300 records
+            (``v2a`` 0.540 -> 0.397).
+        audio_crop: ``"centre"`` or ``"start"``. Training keeps the first
+            ``fixed_audio_duration`` seconds (``data_qwen.py::_get_item``); the
+            two differ by 0.003 AVG-all, so the default follows training.
     """
 
     video_max_frames: int = DEFAULT_VIDEO_FRAMES
@@ -96,7 +116,10 @@ class InferenceConfig:
     media_instruction: str = "Please describe the video."
     instruction_paths: tuple[str, ...] = ("audio", "av")
     duplicate_audio_tokens: bool = False
-    pin_video_resolution: bool = False
+    pin_video_resolution: bool = True
+    video_center_crop: bool = False
+    video_clip_fps: bool = True
+    audio_crop: str = "start"
 
     extra: dict = field(default_factory=dict)
 
@@ -134,7 +157,7 @@ class OmniRetriever:
         dtype: str = "bfloat16",
         config: InferenceConfig | None = None,
         duplicate_audio_tokens: bool = False,
-        pin_video_resolution: bool = False,
+        pin_video_resolution: bool = True,
         instruction_paths: Sequence[str] = ("audio", "av"),
         append_turn_end: bool = True,
     ) -> "OmniRetriever":
