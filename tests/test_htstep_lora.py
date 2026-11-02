@@ -78,6 +78,27 @@ def test_split_reproducible():
     assert ch.same_text_pairs(["a"] * 40 + ["b"] * 40, 32, 50) == ch.same_text_pairs(["a"] * 40 + ["b"] * 40, 32, 50)
 
 
+def test_smoke_subset():
+    it = lambda v, i, s, tar="videos/htstep_videos_4007.tar": {  # noqa: E731
+        "id": f"{v}#{i}", "video_id": v, "step_idx": i, "global_step_index": 1, "partial": "Full Match",
+        "segment": s, "text": "A: b", "source": {"repo": "r", "tar": tar, "member": f"{v}.mp4"}}
+    items = {"train": [it("a", 0, [1, 5]), it("a", 1, [9, 20]), it("a", 2, [30, 31]), it("b", 0, [1, 2]),
+                       it("c", 0, [1, 2]), it("d", 0, [1, 2], tar="videos/htstep_videos_1000.tar")],
+             "val": [it("v", 0, [1, 2], tar="videos/htstep_videos_1000.tar"),
+                     {**it("w", 0, [1, 2]), "source": {"repo": ch.VAL_VIDEOS_REPO, "file": "part1/w.mp4"}}]}
+    ok = {"video": "h264", "pix_fmt": "yuv420p", "duration": 15.0}
+    codecs = {"a": ok, "b": {**ok, "video": "av1"}, "c": {**ok, "pix_fmt": None}, "d": ok,
+              "v": {**ok, "video": "vp9"}, "w": ok}
+    recs, dropped = ch.smoke_select(items, codecs, "videos/htstep_videos_4007.tar", 5, 5)
+    assert {r["video_id"] for r in recs["train"]} == {"a"}       # av1 / no pix_fmt / other tar dropped
+    assert {r["video_id"] for r in recs["val"]} == {"v"}         # val: tar sources only (range read)
+    assert dropped == {"a#2": "past_end"}
+    a1 = recs["train"][1]
+    assert a1["timestamps"] == a1["window"] == [9.0, 15.0] and a1["segment"] == [9, 20]   # end clamped
+    assert a1["video_length"] == 6.0 and "clip" not in a1 and a1["video"] == "a.mp4"
+    assert ch.smoke_select(items, codecs, "videos/htstep_videos_4007.tar", 0, 5)[0]["train"] == []
+
+
 # ------------------------------------------------------------------------------------------------- mask + loss
 def test_mask_and_loss_by_hand():
     texts = ["x", "y", "x"]

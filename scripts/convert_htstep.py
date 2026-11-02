@@ -12,6 +12,12 @@ plan OMNI_HTSTEP_LORA.md section 2). Two steps:
       sha256 of annotations.json / taxonomy.csv, counts;
     * ``items_train.jsonl`` / ``items_val.jsonl``  one record per step: what ``precut_htstep.py`` cuts.
 
+``smoke`` (local or Colab; GPU smoke test of docs/htstep/NHAT_KY_SMOKE.md)
+    A very small train / val set without precut: ``--limit-videos 30 5`` videos (train: one tar, val: tar sources),
+    h264 / vp9 only (``docs/htstep/tai_video/codecs.jsonl``: AV1 and empty video tracks dropped), window clamped to
+    the ffprobe duration; ``smoke_train.jsonl`` / ``smoke_val.jsonl`` in the ``finalize`` record format without
+    ``clip`` (the loader cuts the mp4 itself). ``--video-root`` downloads exactly those mp4s by HTTP range.
+
 ``finalize`` (after ``precut_htstep.py``)
     Reads the precut index (window actually cut, ``video_length``, status of every item) and writes
     ``train_omni_htstep.jsonl`` / ``val_omni_htstep.jsonl`` in the record format of the YouCookII manifests
@@ -32,6 +38,7 @@ Usage
 -----
     python scripts/convert_htstep.py split
     python scripts/convert_htstep.py finalize --precut-index <clips>/precut_index.jsonl
+    python scripts/convert_htstep.py smoke --limit-videos 30 5 [--video-root /content/htstep_smoke/videos]
 """
 
 import argparse
@@ -290,6 +297,65 @@ def cmd_finalize(a) -> None:
     print(json.dumps(stats, indent=1, ensure_ascii=False))
 
 
+def decodable(row: Optional[dict]) -> bool:
+    """decord (pip, Linux) reads h264 / vp9 with a pixel format; AV1 and empty video tracks fail
+    (docs/htstep/TAI_VIDEO.md 3.2-3.3)."""
+    return bool(row) and row.get("video") in ("h264", "vp9") and bool(row.get("pix_fmt"))
+
+
+def smoke_window(segment: List[float], duration: float) -> Optional[List[float]]:
+    """Rule 2.2 with the ffprobe duration: end clamped to it, None (past_end) when start >= duration."""
+    if segment[0] >= duration:
+        return None
+    return [float(segment[0]), float(min(segment[1], duration))]
+
+
+def smoke_select(items: Dict[str, List[dict]], codecs: Dict[str, dict], train_tar: str, n_train: int, n_val: int):
+    """{split: [record]} and the dropped step ids: the first ``n`` decodable videos by id (train: of ``train_tar``,
+    val: with a tar source, so that every mp4 comes by range read)."""
+    want = {"train": lambda it: it["source"].get("tar") == train_tar, "val": lambda it: "tar" in it["source"]}
+    out, dropped = {}, {}
+    for sp, n in (("train", n_train), ("val", n_val)):
+        vids = sorted({it["video_id"] for it in items[sp] if want[sp](it) and decodable(codecs.get(it["video_id"]))})[:n]
+        keep = set(vids)
+        recs = []
+        for it in items[sp]:
+            if it["video_id"] not in keep:
+                continue
+            w = smoke_window(it["segment"], codecs[it["video_id"]]["duration"])
+            if w is None:
+                dropped[it["id"]] = "past_end"
+                continue
+            r = build_record(it, w, w[1] - w[0])
+            del r["clip"]
+            recs.append(r)
+        out[sp] = sorted(recs, key=lambda r: (r["video_id"], r["step_idx"]))
+    return out, dropped
+
+
+def cmd_smoke(a) -> None:
+    items = {s: read_jsonl(os.path.join(a.items_dir, f"items_{s}.jsonl")) for s in SPLITS}
+    codecs = {r["video_id"]: r for r in read_jsonl(a.codecs)}
+    recs, dropped = smoke_select(items, codecs, a.train_tar, *a.limit_videos)
+    for s, rs in recs.items():
+        sha = write_jsonl(rs, os.path.join(a.out_dir, f"smoke_{s}.jsonl"))
+        print(f"smoke_{s}.jsonl: {len(rs)} steps / {len({r['video_id'] for r in rs})} videos  sha256 {sha}")
+    print("dropped (past_end):", dropped)
+    if not a.video_root:
+        return
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from bench_precut_one_tar import range_get
+    idx = {(r["tar_path"], r["member_name"]): r for r in csv.DictReader(open(a.tar_index, encoding="utf-8"))}
+    src = {it["video_id"]: it["source"] for s in SPLITS for it in items[s]}
+    os.makedirs(a.video_root, exist_ok=True)
+    for vid in sorted({r["video_id"] for rs in recs.values() for r in rs}):
+        m = idx[(src[vid]["tar"], src[vid]["member"])]
+        out = os.path.join(a.video_root, f"{vid}.mp4")
+        if not (os.path.exists(out) and os.path.getsize(out) == int(m["size"])):
+            range_get(src[vid]["tar"], int(m["offset_data"]), int(m["size"]), out)
+        print(f"  {vid}.mp4 {int(m['size']) / 1e6:.1f} MB", flush=True)
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -305,8 +371,16 @@ def main() -> None:
     f = sub.add_parser("finalize")
     f.add_argument("--precut-index", required=True)
     f.add_argument("--out-dir", default=os.path.join(REPO_ROOT, "data", "htstep"))
+    m = sub.add_parser("smoke")
+    m.add_argument("--limit-videos", nargs=2, type=int, default=[30, 5], metavar=("TRAIN", "VAL"))
+    m.add_argument("--train-tar", default="videos/htstep_videos_4007.tar")
+    m.add_argument("--codecs", default=os.path.join(REPO_ROOT, "docs", "htstep", "tai_video", "codecs.jsonl"))
+    m.add_argument("--tar-index", default=os.path.join(REPO_ROOT, "data", "htstep", "tar_index.csv"))
+    m.add_argument("--items-dir", default=os.path.join(REPO_ROOT, "data", "htstep"))
+    m.add_argument("--out-dir", default=os.path.join(REPO_ROOT, "data", "htstep", "smoke"))
+    m.add_argument("--video-root", default="", help="download the mp4s here (HTTP range); empty = manifests only")
     a = p.parse_args()
-    cmd_split(a) if a.cmd == "split" else cmd_finalize(a)
+    {"split": cmd_split, "finalize": cmd_finalize, "smoke": cmd_smoke}[a.cmd](a)
 
 
 if __name__ == "__main__":

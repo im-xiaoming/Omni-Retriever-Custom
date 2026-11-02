@@ -104,6 +104,45 @@ def rank0_print(*args, **kwargs):
         kwargs.setdefault("flush", True)
         print(*args, **kwargs)
 
+class VramCallback(TrainerCallback):
+    """GPU memory (GB) once the model + adapter sit on the GPU (train begin, before any optimiser state) and at every
+    log, plus the wall time of every optimiser step; rewritten to <output_dir>/vram.json at each log so a run killed
+    by OOM keeps what it measured. Reads counters only: training is unchanged."""
+
+    def __init__(self, output_dir):
+        self.path, self.doc, self.t = os.path.join(output_dir, "vram.json"), {"log": [], "step_seconds": []}, None
+
+    @staticmethod
+    def _mem():
+        gb = lambda b: round(b / 2 ** 30, 3)  # noqa: E731
+        return {"allocated_gb": gb(torch.cuda.memory_allocated()), "max_allocated_gb": gb(torch.cuda.max_memory_allocated()),
+                "max_reserved_gb": gb(torch.cuda.max_memory_reserved())}
+
+    def _write(self):
+        with open(self.path, "w", encoding="utf-8") as f:
+            json.dump(self.doc, f, indent=1)
+
+    def on_train_begin(self, args, state, control, **kwargs):
+        p = torch.cuda.get_device_properties(0)
+        self.doc.update(gpu=p.name, total_gb=round(p.total_memory / 2 ** 30, 2),
+                        batch_size=args.per_device_train_batch_size, after_load=self._mem())
+        self.t = time.time()
+        self._write()
+
+    def on_step_end(self, args, state, control, **kwargs):
+        now = time.time()
+        self.doc["step_seconds"].append(round(now - self.t, 3))
+        self.t = now
+
+    def on_log(self, args, state, control, logs=None, **kwargs):
+        self.doc["log"].append({"step": state.global_step, "loss": (logs or {}).get("loss"), **self._mem()})
+        self._write()
+
+    def on_train_end(self, args, state, control, **kwargs):
+        self.doc["end"] = self._mem()
+        self._write()
+
+
 def apply_liger_kernel_to_qwen2_5_vl(
     rope: bool = True,
     cross_entropy: bool = False,
@@ -468,6 +507,8 @@ def train(attn_implementation="flash_attention_2"):
             )
         )
         callbacks = [LossProgressCallback()]
+        if torch.cuda.is_available() and is_rank_zero():
+            callbacks.append(VramCallback(training_args.output_dir))
         if training_args.eval_manifest:
             from qwenvl.train.retrieval_eval import RetrievalEvalCallback, eval_dataset
             n_train = len(data_module["train_dataset"])
