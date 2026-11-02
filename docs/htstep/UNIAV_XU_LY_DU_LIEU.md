@@ -324,6 +324,9 @@ bước (`trunc_thresh = 0.5`); mốc bị kẹp vào cửa sổ rồi trừ `st
   **Không có vector sự kiện `z_i`** (span vector tính ở dòng 550 nhưng không trả ra).
 - [đọc code] Không ghi file: `valid_one_epoch` dùng trực tiếp trong bộ nhớ để tính độ đo (`libs/utils/train_utils.py:199-221`); `train.py --eval`
   chỉ in số (`train.py:80-86`). Checkpoint lưu `{'epoch', 'state_dict', 'metrics'}` (`train.py:121`).
+- **Cập nhật 2026-11-02:** code HT-Step 0-shot của Fushion (`uemr_htstep/`, `configs/htstep_0shot_protocol.json`, notebook
+  `uemr_htstep_0shot_AZ.ipynb`, test) đã bỏ ở commit `588bd38` (không làm nữa). Các trích dẫn tới những file đó bên dưới và ở mục 11 là
+  theo commit `4c6dbb6`. `uniav_app/` và `uemr_fusion/` vẫn còn.
 - [đọc code] Fushion (nhánh `htstep` @ `4c6dbb6`), chỗ nhận đầu ra "UniAV": hiện là Athena YouCook2 vendored từ UniAV-fixed nhánh `ov-refine`
   (`third_party/athena/VENDORED.md:3`), chạy qua `uniav_app`:
   - `raw_proposals.jsonl`: `{video_id, split, duration, n, feature_source, run, time_params, proposals: [{g_s, g_e, ts, te, conf}]}`, giây,
