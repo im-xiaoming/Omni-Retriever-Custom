@@ -451,7 +451,8 @@ class LazySupervisedDataset(Dataset):
         fsize = os.path.getsize(video_file)
         if fsize < 1024:
             raise ValueError(f"Video too small ({fsize}B), likely corrupted: {video_file}")
-        if fsize > 500 * 1024 * 1024:
+        # MAX_VIDEO_MB: HT-Step AV1 videos converted to lossless H.264 (scripts/download_htstep.py) pass 500 MB
+        if fsize > int(os.environ.get("MAX_VIDEO_MB", 500)) * 1024 * 1024:
             raise ValueError(f"Video too large ({fsize // 1024 // 1024}MB), skipping: {video_file}")
 
     @staticmethod

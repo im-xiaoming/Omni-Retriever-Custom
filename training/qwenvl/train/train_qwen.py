@@ -141,6 +141,7 @@ class VramCallback(TrainerCallback):
     def on_train_end(self, args, state, control, **kwargs):
         self.doc["end"] = self._mem()
         self._write()
+        print(f"[vram] {self.path}: " + json.dumps({k: v for k, v in self.doc.items() if k != "log"}), flush=True)
 
 
 def apply_liger_kernel_to_qwen2_5_vl(
