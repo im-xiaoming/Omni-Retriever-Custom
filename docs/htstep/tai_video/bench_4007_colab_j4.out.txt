@@ -1,0 +1,349 @@
+{"tar": "videos/htstep_videos_4007.tar", "members": 82, "needed_videos": 82, "needed_steps": 558, "host": {"platform": "Linux-6.6.159+-x86_64-with-glibc2.39", "cpu_logical": 2, "cpu_physical": 1, "ram_gb": 12.7, "ram_free_gb": 11.7, "disk_free_gb": 107.3}}
+[a] tar downloaded: 1.97 GB in 11s
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609791.355358   13732 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609791.525606   13733 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609791.627427   13730 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609791.659594   13731 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1793609791.792592   13732 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793609791.959151   13733 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793609792.024455   13730 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793609792.061376   13731 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609803.838243   13731 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609803.841259   13732 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609804.088487   13730 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793609804.310664   13733 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+[a] 1/82 6J0fRqR3FE4: 2 steps, fetch 0.92s, cut 18.13s | 76s
+[a] 2/82 5xsGpR7zHeQ: 17 steps, fetch 5.7s, cut 80.62s | 143s
+[a] 3/82 5quC17gTmLI: 6 steps, fetch 5.45s, cut 26.22s | 143s
+[a] 4/82 5naNOdqwgBg: 12 steps, fetch 5.42s, cut 78.95s | 143s
+[a] 5/82 62e_L1UbWEs: 4 steps, fetch 0.47s, cut 40.03s | 143s
+[a] 6/82 5xO7kvTmIiI: 12 steps, fetch 0.56s, cut 48.31s | 143s
+[a] 7/82 5o3xHYqVq0E: 6 steps, fetch 0.47s, cut 36.67s | 154s
+[a] 8/82 6Dq3n-LU6w8: 6 steps, fetch 0.35s, cut 40.22s | 179s
+[a] 9/82 65Q6IzUyvjc: 5 steps, fetch 0.25s, cut 36.05s | 179s
+[h264 @ 0x383b3540] mmco: unref short failure
+[h264 @ 0x383b3540] mmco: unref short failure
+[a] 10/82 5rUmkNeQczk: 10 steps, fetch 0.61s, cut 41.78s | 186s
+[h264 @ 0x382d6900] mmco: unref short failure
+[h264 @ 0x382d6900] mmco: unref short failure
+[h264 @ 0x3a684540] mmco: unref short failure
+[a] 11/82 6DYHl43yxzY: 16 steps, fetch 0.12s, cut 55.01s | 209s
+[a] 12/82 65jEPDyDAxo: 9 steps, fetch 0.25s, cut 22.32s | 209s
+[a] 13/82 6KQ0jxhO0GY: 7 steps, fetch 0.19s, cut 26.03s | 209s
+[a] 14/82 69MhALrfs0Y: 5 steps, fetch 0.41s, cut 20.83s | 209s
+[a] 15/82 6LRqrQj0WXQ: 4 steps, fetch 0.28s, cut 0.23s | 209s
+[a] 16/82 6DSst17j_Tk: 1 steps, fetch 0.3s, cut 3.31s | 209s
+[a] 17/82 5sy5boTw1hM: 5 steps, fetch 0.4s, cut 13.61s | 219s
+[a] 18/82 6-sXPEuDBNg: 4 steps, fetch 0.38s, cut 20.5s | 226s
+[a] 19/82 61rfwX7H4eA: 10 steps, fetch 0.21s, cut 57.7s | 265s
+[a] 20/82 5ywsVsABgac: 6 steps, fetch 0.3s, cut 22.56s | 265s
+[a] 21/82 6HgjDaLH6Cc: 7 steps, fetch 0.2s, cut 42.77s | 265s
+[a] 22/82 5wfUAPGP4Qc: 6 steps, fetch 0.35s, cut 32.54s | 265s
+[a] 23/82 68EYtED_aZ0: 16 steps, fetch 0.21s, cut 40.67s | 273s
+[h264 @ 0x3a76ca80] mmco: unref short failure
+[a] 24/82 5xGcYCEMc5w: 17 steps, fetch 0.21s, cut 37.35s | 296s
+[a] 25/82 6Eh-A0oaU5c: 27 steps, fetch 0.13s, cut 54.85s | 317s
+[a] 26/82 6BPCaD7og90: 12 steps, fetch 0.09s, cut 28.27s | 317s
+[a] 27/82 6D_DvQrWltw: 6 steps, fetch 0.18s, cut 29.79s | 317s
+[a] 28/82 644g24VtJ34: 5 steps, fetch 0.09s, cut 10.61s | 317s
+[a] 29/82 6-0u49Hd6Qg: 8 steps, fetch 0.19s, cut 33.5s | 330s
+[a] 30/82 6GNIQMLKukw: 2 steps, fetch 0.11s, cut 4.31s | 330s
+[a] 31/82 6144aW9h-ng: 9 steps, fetch 0.5s, cut 36.53s | 341s
+[a] 32/82 5uc9mlQ2sCg: 16 steps, fetch 0.41s, cut 36.49s | 344s
+[a] 33/82 5rUaQMoB0fo: 4 steps, fetch 0.17s, cut 17.26s | 344s
+[a] 34/82 6C09D_b96ag: 7 steps, fetch 0.1s, cut 21.03s | 351s
+[a] 35/82 67D0nVP49g0: 3 steps, fetch 0.1s, cut 17.95s | 352s
+[a] 36/82 6Db2TyxGoCA: 13 steps, fetch 0.16s, cut 35.07s | 376s
+[a] 37/82 66ODcz0fXy4: 9 steps, fetch 0.12s, cut 29.43s | 376s
+[a] 38/82 62Q39oRlUMQ: 3 steps, fetch 0.13s, cut 11.55s | 376s
+[a] 39/82 6BrHbfvgbCo: 3 steps, fetch 0.1s, cut 14.51s | 376s
+[a] 40/82 6GTUEKy0Ysc: 5 steps, fetch 0.11s, cut 11.6s | 376s
+[a] 41/82 5yqNbrNbyXY: 13 steps, fetch 0.13s, cut 29.97s | 397s
+[a] 42/82 5u97b1SqF1s: 26 steps, fetch 0.11s, cut 0.37s | 397s
+[a] 43/82 64Fv7n6MTXA: 3 steps, fetch 0.12s, cut 10.23s | 397s
+[a] 44/82 6CNyVXKbUCw: 6 steps, fetch 0.05s, cut 22.39s | 397s
+[a] 45/82 6-gX4Rptlv8: 6 steps, fetch 0.16s, cut 12.59s | 397s
+[a] 46/82 6MDrVtv5TYU: 9 steps, fetch 0.27s, cut 31.96s | 417s
+[a] 47/82 623TWw3AyN0: 5 steps, fetch 0.11s, cut 20.02s | 417s
+[a] 48/82 5xzuJjMG5b8: 5 steps, fetch 0.17s, cut 24.21s | 421s
+[a] 49/82 5w7t8YraMns: 3 steps, fetch 0.21s, cut 10.92s | 421s
+[a] 50/82 6HXshsb_ukU: 1 steps, fetch 0.08s, cut 2.22s | 421s
+[a] 51/82 68fHwgOwUrA: 8 steps, fetch 0.09s, cut 22.36s | 432s
+[a] 52/82 65cChny_M9I: 4 steps, fetch 0.03s, cut 16.68s | 432s
+[a] 53/82 5vFCNkijQKQ: 8 steps, fetch 0.28s, cut 17.5s | 434s
+[a] 54/82 5zx80_z7-Oo: 4 steps, fetch 0.08s, cut 10.51s | 434s
+[a] 55/82 66ZRZZS2X-w: 6 steps, fetch 0.13s, cut 11.69s | 439s
+[a] 56/82 6-XNJpDWZCA: 7 steps, fetch 0.08s, cut 0.07s | 439s
+[a] 57/82 6-l7XNOE7ao: 7 steps, fetch 0.08s, cut 11.27s | 443s
+[a] 58/82 6AWSeIlkugY: 2 steps, fetch 0.06s, cut 3.54s | 443s
+[a] 59/82 5srhNnU_iJY: 2 steps, fetch 0.06s, cut 4.15s | 443s
+[a] 60/82 6-jrbyTfKVo: 7 steps, fetch 0.07s, cut 11.89s | 448s
+[a] 61/82 6C27nUK7UkU: 4 steps, fetch 0.08s, cut 9.0s | 448s
+[a] 62/82 5qw3qq5k9QA: 10 steps, fetch 0.08s, cut 18.71s | 458s
+[a] 63/82 5rPbLaZf-Kw: 3 steps, fetch 0.06s, cut 5.05s | 458s
+[a] 64/82 6ADVLgyyDlo: 1 steps, fetch 0.05s, cut 0.02s | 458s
+[a] 65/82 6JkDD4986Ao: 1 steps, fetch 0.06s, cut 3.94s | 458s
+[a] 66/82 6Gxo9hXfe8c: 4 steps, fetch 0.03s, cut 12.46s | 460s
+[a] 67/82 62IO8n7ezCg: 5 steps, fetch 0.05s, cut 8.63s | 460s
+[a] 68/82 6-mt8up1F7A: 3 steps, fetch 0.05s, cut 8.04s | 460s
+[a] 69/82 6E6S3-BA41M: 3 steps, fetch 0.05s, cut 0.08s | 460s
+[a] 70/82 5pXwpGdB1Tg: 1 steps, fetch 0.1s, cut 4.22s | 462s
+[a] 71/82 60mj1fHhADo: 5 steps, fetch 0.03s, cut 6.47s | 464s
+[a] 72/82 5uxGIhWU5ls: 2 steps, fetch 0.05s, cut 1.74s | 464s
+[buffer @ 0x38a28880] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38a28880] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38a28880] Error setting option pix_fmt to value -1.
+[in @ 0x3b856cc0] Error applying options to the filter.
+[buffer @ 0x37d62e40] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37d62e40] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37d62e40] Error setting option pix_fmt to value -1.
+[in @ 0x389617c0] Error applying options to the filter.
+[buffer @ 0x373afcc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x373afcc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x373afcc0] Error setting option pix_fmt to value -1.
+[in @ 0x3b6c6240] Error applying options to the filter.
+[buffer @ 0x37a15600] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37a15600] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37a15600] Error setting option pix_fmt to value -1.
+[in @ 0x3753d200] Error applying options to the filter.
+[buffer @ 0x3acac7c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3acac7c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3acac7c0] Error setting option pix_fmt to value -1.
+[in @ 0x37874400] Error applying options to the filter.
+[buffer @ 0x29755fc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x29755fc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x29755fc0] Error setting option pix_fmt to value -1.
+[in @ 0x379231c0] Error applying options to the filter.
+[buffer @ 0x37330380] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37330380] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37330380] Error setting option pix_fmt to value -1.
+[in @ 0x385183c0] Error applying options to the filter.
+[buffer @ 0x3accba40] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3accba40] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3accba40] Error setting option pix_fmt to value -1.
+[in @ 0x378090c0] Error applying options to the filter.
+[buffer @ 0x3836e7c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3836e7c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3836e7c0] Error setting option pix_fmt to value -1.
+[in @ 0x37a44d40] Error applying options to the filter.
+[buffer @ 0x37afec80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37afec80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37afec80] Error setting option pix_fmt to value -1.
+[in @ 0x386a4400] Error applying options to the filter.
+[buffer @ 0x3accd800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3accd800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3accd800] Error setting option pix_fmt to value -1.
+[in @ 0x3ac2e680] Error applying options to the filter.
+[buffer @ 0x3b1a1c80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3b1a1c80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3b1a1c80] Error setting option pix_fmt to value -1.
+[in @ 0x3b857800] Error applying options to the filter.
+[buffer @ 0x38446f00] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38446f00] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38446f00] Error setting option pix_fmt to value -1.
+[in @ 0x371c6a00] Error applying options to the filter.
+[buffer @ 0x3acc7d80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3acc7d80] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3acc7d80] Error setting option pix_fmt to value -1.
+[in @ 0x395d8940] Error applying options to the filter.
+[buffer @ 0x382f9280] Unable to parse option value "-1" as pixel format
+[buffer @ 0x382f9280] Unable to parse option value "-1" as pixel format
+[buffer @ 0x382f9280] Error setting option pix_fmt to value -1.
+[in @ 0x38577a40] Error applying options to the filter.
+[a] 73/82 69_GITSpIno: 9 steps, fetch 0.05s, cut 17.21s | 478s
+[a] 74/82 62MI9eK6YEE: 7 steps, fetch 0.03s, cut 9.17s | 478s
+[a] 75/82 65K1Orjw-4c: 7 steps, fetch 0.03s, cut 8.3s | 478s
+[a] 76/82 5mOfGfp7yFc: 4 steps, fetch 0.09s, cut 8.23s | 478s
+[a] 77/82 62D0pT4w8f4: 4 steps, fetch 0.07s, cut 8.02s | 478s
+[a] 78/82 5qk4ZEQ1YQk: 3 steps, fetch 0.1s, cut 5.62s | 478s
+[a] 79/82 614d-Oi2ip0: 6 steps, fetch 0.02s, cut 5.04s | 478s
+[a] 80/82 6DGTIsQfGM4: 4 steps, fetch 0.01s, cut 0.03s | 478s
+[a] 81/82 5t3SrWk74L0: 5 steps, fetch 0.0s, cut 0.09s | 478s
+[a] 82/82 6FdIHkVlNoI: 10 steps, fetch 0.0s, cut 0.1s | 478s
+{"mode": "a", "jobs": 4, "videos": 82, "steps": 558, "status": {"ok": 498, "past_end": 0, "unreadable": 60}, "fetch_errors": [], "wall_seconds": 478.6, "tar_download_seconds": 11.3, "cut_phase_wall_seconds": 467.1, "fetch_seconds_sum": 30.2, "mp4_bytes": 1971261216, "cut_seconds_sum": 1649.9, "cut_cpu_seconds_sum": 701.6, "cut_seconds_per_video": {"50": 17.21, "90": 40.67, "100": 80.62}, "cut_seconds_per_step": {"mean": 2.957, "p50": 2.405, "p90": 6.188, "p99": 10.131, "p100": 16.814}, "disk_peak_bytes": 2457172883, "clip_bytes": 470251291, "clip_bytes_per_step": 944280, "peak_rss_mb_worker_max": 2104.6}
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610246.794822   20041 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610246.821088   20043 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610246.821433   20040 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610246.926252   20042 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1793610247.104794   20043 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793610247.111665   20040 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793610247.117975   20041 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+I0000 00:00:1793610247.199880   20042 cpu_feature_guard.cc:227] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610257.636134   20041 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610257.832914   20043 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610258.101122   20040 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793610258.196821   20042 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+[b] 1/82 6J0fRqR3FE4: 2 steps, fetch 1.12s, cut 20.7s | 53s
+[b] 2/82 5xsGpR7zHeQ: 17 steps, fetch 1.76s, cut 78.06s | 111s
+[b] 3/82 5quC17gTmLI: 6 steps, fetch 1.44s, cut 25.19s | 111s
+[b] 4/82 5naNOdqwgBg: 12 steps, fetch 1.38s, cut 76.3s | 111s
+[b] 5/82 62e_L1UbWEs: 4 steps, fetch 1.74s, cut 41.17s | 111s
+[b] 6/82 5xO7kvTmIiI: 12 steps, fetch 1.45s, cut 47.83s | 111s
+[b] 7/82 5o3xHYqVq0E: 6 steps, fetch 1.05s, cut 32.43s | 129s
+[h264 @ 0x3833e840] mmco: unref short failure
+[h264 @ 0x3833e840] mmco: unref short failure
+[b] 8/82 6Dq3n-LU6w8: 6 steps, fetch 1.14s, cut 42.29s | 151s
+[b] 9/82 65Q6IzUyvjc: 5 steps, fetch 0.96s, cut 32.0s | 151s
+[h264 @ 0x37923680] mmco: unref short failure
+[h264 @ 0x37923680] mmco: unref short failure
+[b] 10/82 5rUmkNeQczk: 10 steps, fetch 1.05s, cut 51.29s | 163s
+[h264 @ 0x3995a680] mmco: unref short failure
+[b] 11/82 6DYHl43yxzY: 16 steps, fetch 0.97s, cut 62.41s | 193s
+[b] 12/82 65jEPDyDAxo: 9 steps, fetch 1.3s, cut 32.03s | 193s
+[b] 13/82 6KQ0jxhO0GY: 7 steps, fetch 3.58s, cut 25.79s | 193s
+[b] 14/82 69MhALrfs0Y: 5 steps, fetch 1.33s, cut 20.54s | 193s
+[b] 15/82 6LRqrQj0WXQ: 4 steps, fetch 1.25s, cut 0.12s | 193s
+[b] 16/82 6DSst17j_Tk: 1 steps, fetch 1.07s, cut 3.09s | 193s
+[b] 17/82 5sy5boTw1hM: 5 steps, fetch 0.91s, cut 12.87s | 194s
+[b] 18/82 6-sXPEuDBNg: 4 steps, fetch 1.12s, cut 21.44s | 204s
+[b] 19/82 61rfwX7H4eA: 10 steps, fetch 1.04s, cut 57.65s | 244s
+[b] 20/82 5ywsVsABgac: 6 steps, fetch 0.9s, cut 22.67s | 244s
+[b] 21/82 6HgjDaLH6Cc: 7 steps, fetch 1.16s, cut 41.16s | 244s
+[b] 22/82 5wfUAPGP4Qc: 6 steps, fetch 1.1s, cut 30.22s | 244s
+[b] 23/82 68EYtED_aZ0: 16 steps, fetch 0.76s, cut 39.95s | 257s
+[h264 @ 0x37b36580] mmco: unref short failure
+[b] 24/82 5xGcYCEMc5w: 17 steps, fetch 0.89s, cut 39.05s | 275s
+[b] 25/82 6Eh-A0oaU5c: 27 steps, fetch 0.94s, cut 53.28s | 291s
+[b] 26/82 6BPCaD7og90: 12 steps, fetch 0.72s, cut 27.96s | 291s
+[b] 27/82 6D_DvQrWltw: 6 steps, fetch 0.94s, cut 28.31s | 291s
+[b] 28/82 644g24VtJ34: 5 steps, fetch 0.7s, cut 11.06s | 291s
+[b] 29/82 6-0u49Hd6Qg: 8 steps, fetch 0.79s, cut 31.2s | 307s
+[b] 30/82 6GNIQMLKukw: 2 steps, fetch 0.75s, cut 3.62s | 307s
+[b] 31/82 6144aW9h-ng: 9 steps, fetch 0.88s, cut 36.77s | 324s
+[b] 32/82 5uc9mlQ2sCg: 16 steps, fetch 0.78s, cut 38.93s | 329s
+[b] 33/82 5rUaQMoB0fo: 4 steps, fetch 0.91s, cut 17.18s | 329s
+[b] 34/82 6C09D_b96ag: 7 steps, fetch 0.99s, cut 20.96s | 329s
+[b] 35/82 67D0nVP49g0: 3 steps, fetch 0.84s, cut 18.82s | 329s
+[b] 36/82 6Db2TyxGoCA: 13 steps, fetch 0.79s, cut 32.99s | 358s
+[b] 37/82 66ODcz0fXy4: 9 steps, fetch 0.78s, cut 26.98s | 358s
+[b] 38/82 62Q39oRlUMQ: 3 steps, fetch 0.64s, cut 11.29s | 358s
+[b] 39/82 6BrHbfvgbCo: 3 steps, fetch 0.64s, cut 14.55s | 358s
+[b] 40/82 6GTUEKy0Ysc: 5 steps, fetch 0.76s, cut 10.57s | 358s
+[b] 41/82 5yqNbrNbyXY: 13 steps, fetch 0.84s, cut 29.47s | 374s
+[b] 42/82 5u97b1SqF1s: 26 steps, fetch 0.77s, cut 0.54s | 374s
+[b] 43/82 64Fv7n6MTXA: 3 steps, fetch 1.05s, cut 8.93s | 374s
+[b] 44/82 6CNyVXKbUCw: 6 steps, fetch 0.76s, cut 22.78s | 380s
+[b] 45/82 6-gX4Rptlv8: 6 steps, fetch 0.67s, cut 12.72s | 380s
+[b] 46/82 6MDrVtv5TYU: 9 steps, fetch 0.86s, cut 31.13s | 395s
+[b] 47/82 623TWw3AyN0: 5 steps, fetch 0.67s, cut 20.92s | 395s
+[b] 48/82 5xzuJjMG5b8: 5 steps, fetch 0.72s, cut 24.12s | 399s
+[b] 49/82 5w7t8YraMns: 3 steps, fetch 0.83s, cut 10.5s | 399s
+[b] 50/82 6HXshsb_ukU: 1 steps, fetch 0.7s, cut 3.4s | 399s
+[b] 51/82 68fHwgOwUrA: 8 steps, fetch 0.95s, cut 20.92s | 414s
+[b] 52/82 65cChny_M9I: 4 steps, fetch 0.69s, cut 15.3s | 414s
+[b] 53/82 5vFCNkijQKQ: 8 steps, fetch 0.78s, cut 17.5s | 414s
+[b] 54/82 5zx80_z7-Oo: 4 steps, fetch 0.57s, cut 10.8s | 414s
+[b] 55/82 66ZRZZS2X-w: 6 steps, fetch 0.74s, cut 8.92s | 420s
+[b] 56/82 6-XNJpDWZCA: 7 steps, fetch 0.6s, cut 0.12s | 420s
+[b] 57/82 6-l7XNOE7ao: 7 steps, fetch 0.82s, cut 9.69s | 423s
+[b] 58/82 6AWSeIlkugY: 2 steps, fetch 0.77s, cut 3.22s | 423s
+[b] 59/82 5srhNnU_iJY: 2 steps, fetch 0.65s, cut 3.65s | 423s
+[b] 60/82 6-jrbyTfKVo: 7 steps, fetch 0.54s, cut 10.62s | 429s
+[b] 61/82 6C27nUK7UkU: 4 steps, fetch 0.83s, cut 8.3s | 429s
+[b] 62/82 5qw3qq5k9QA: 10 steps, fetch 0.94s, cut 17.71s | 439s
+[b] 63/82 5rPbLaZf-Kw: 3 steps, fetch 0.89s, cut 5.54s | 439s
+[b] 64/82 6ADVLgyyDlo: 1 steps, fetch 0.58s, cut 0.02s | 439s
+[b] 65/82 6JkDD4986Ao: 1 steps, fetch 0.51s, cut 3.17s | 439s
+[b] 66/82 6Gxo9hXfe8c: 4 steps, fetch 0.68s, cut 12.29s | 442s
+[b] 67/82 62IO8n7ezCg: 5 steps, fetch 0.71s, cut 8.7s | 442s
+[b] 68/82 6-mt8up1F7A: 3 steps, fetch 0.5s, cut 6.99s | 442s
+[b] 69/82 6E6S3-BA41M: 3 steps, fetch 0.52s, cut 0.05s | 442s
+[b] 70/82 5pXwpGdB1Tg: 1 steps, fetch 0.63s, cut 3.5s | 443s
+[b] 71/82 60mj1fHhADo: 5 steps, fetch 0.68s, cut 6.0s | 446s
+[b] 72/82 5uxGIhWU5ls: 2 steps, fetch 0.46s, cut 1.88s | 446s
+[b] 73/82 69_GITSpIno: 9 steps, fetch 0.44s, cut 16.04s | 458s
+[b] 74/82 62MI9eK6YEE: 7 steps, fetch 0.47s, cut 7.91s | 458s
+[b] 75/82 65K1Orjw-4c: 7 steps, fetch 0.62s, cut 9.06s | 458s
+[b] 76/82 5mOfGfp7yFc: 4 steps, fetch 0.54s, cut 7.74s | 458s
+[buffer @ 0x37c28980] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37c28980] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37c28980] Error setting option pix_fmt to value -1.
+[in @ 0x2ed57740] Error applying options to the filter.
+[buffer @ 0x370fc800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x370fc800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x370fc800] Error setting option pix_fmt to value -1.
+[in @ 0x37875980] Error applying options to the filter.
+[buffer @ 0x3ab62800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3ab62800] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3ab62800] Error setting option pix_fmt to value -1.
+[in @ 0x374fdc80] Error applying options to the filter.
+[buffer @ 0x3761c4c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3761c4c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3761c4c0] Error setting option pix_fmt to value -1.
+[in @ 0x371670c0] Error applying options to the filter.
+[buffer @ 0x3712b040] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3712b040] Unable to parse option value "-1" as pixel format
+[buffer @ 0x3712b040] Error setting option pix_fmt to value -1.
+[in @ 0x38382800] Error applying options to the filter.
+[buffer @ 0x384e4640] Unable to parse option value "-1" as pixel format
+[buffer @ 0x384e4640] Unable to parse option value "-1" as pixel format
+[buffer @ 0x384e4640] Error setting option pix_fmt to value -1.
+[in @ 0x37485680] Error applying options to the filter.
+[buffer @ 0x38356480] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38356480] Unable to parse option value "-1" as pixel format
+[buffer @ 0x38356480] Error setting option pix_fmt to value -1.
+[in @ 0x3790d780] Error applying options to the filter.
+[buffer @ 0x383cadc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x383cadc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x383cadc0] Error setting option pix_fmt to value -1.
+[in @ 0x3855e7c0] Error applying options to the filter.
+[buffer @ 0x374f7340] Unable to parse option value "-1" as pixel format
+[buffer @ 0x374f7340] Unable to parse option value "-1" as pixel format
+[buffer @ 0x374f7340] Error setting option pix_fmt to value -1.
+[in @ 0x386da100] Error applying options to the filter.
+[buffer @ 0x385c26c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x385c26c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x385c26c0] Error setting option pix_fmt to value -1.
+[in @ 0x383b00c0] Error applying options to the filter.
+[buffer @ 0x383cccc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x383cccc0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x383cccc0] Error setting option pix_fmt to value -1.
+[in @ 0x38721780] Error applying options to the filter.
+[buffer @ 0x37139500] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37139500] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37139500] Error setting option pix_fmt to value -1.
+[in @ 0x385e5f00] Error applying options to the filter.
+[buffer @ 0x376d7ec0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x376d7ec0] Unable to parse option value "-1" as pixel format
+[buffer @ 0x376d7ec0] Error setting option pix_fmt to value -1.
+[in @ 0x3764f8c0] Error applying options to the filter.
+[buffer @ 0x37150440] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37150440] Unable to parse option value "-1" as pixel format
+[buffer @ 0x37150440] Error setting option pix_fmt to value -1.
+[in @ 0x374dde80] Error applying options to the filter.
+[buffer @ 0x385c2580] Unable to parse option value "-1" as pixel format
+[buffer @ 0x385c2580] Unable to parse option value "-1" as pixel format
+[buffer @ 0x385c2580] Error setting option pix_fmt to value -1.
+[in @ 0x371ed380] Error applying options to the filter.
+[b] 77/82 62D0pT4w8f4: 4 steps, fetch 0.61s, cut 8.23s | 459s
+[b] 78/82 5qk4ZEQ1YQk: 3 steps, fetch 0.61s, cut 4.61s | 459s
+[b] 79/82 614d-Oi2ip0: 6 steps, fetch 0.54s, cut 4.96s | 460s
+[b] 80/82 6DGTIsQfGM4: 4 steps, fetch 0.42s, cut 0.05s | 460s
+[b] 81/82 5t3SrWk74L0: 5 steps, fetch 0.36s, cut 0.1s | 460s
+[b] 82/82 6FdIHkVlNoI: 10 steps, fetch 0.39s, cut 0.09s | 460s
+{"mode": "b", "jobs": 4, "videos": 82, "steps": 558, "status": {"ok": 498, "past_end": 0, "unreadable": 60}, "fetch_errors": [], "wall_seconds": 459.9, "tar_download_seconds": 0.0, "cut_phase_wall_seconds": 459.8, "fetch_seconds_sum": 71.2, "mp4_bytes": 1971261216, "cut_seconds_sum": 1638.9, "cut_cpu_seconds_sum": 705.6, "cut_seconds_per_video": {"50": 16.04, "90": 41.17, "100": 78.06}, "cut_seconds_per_step": {"mean": 2.937, "p50": 2.329, "p90": 6.034, "p99": 11.756, "p100": 17.804}, "disk_peak_bytes": 486657253, "clip_bytes": 470251291, "clip_bytes_per_step": 944280, "peak_rss_mb_worker_max": 2292.6}
+a_equals_b {"steps": 558, "differ": []}

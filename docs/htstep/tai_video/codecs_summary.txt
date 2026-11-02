@@ -1,0 +1,12 @@
+videos 7620 steps 47141
+av1 {'val_videos': 20, 'val_steps': 117, 'train_videos': 366, 'train_steps': 2580}
+h264 {'val_videos': 180, 'val_steps': 1039, 'train_videos': 5828, 'train_steps': 35652}
+h264_no_pix_fmt_decode_fail {'train_videos': 98, 'train_steps': 768}
+h264_no_pix_fmt_decode_ok {'train_videos': 2, 'train_steps': 8}
+probe_error {'train_videos': 2, 'train_steps': 7}
+vp9 {'val_videos': 310, 'val_steps': 1834, 'train_videos': 814, 'train_steps': 5136}
+probe errors: [('9W-KE40BxXA', 'r Error reply\nsubfile,,start,871638528,end,871936216,,:https://us.gcp.cdn.hf.co/xet-bridge-us/6ac5f2043e5371d47f986d5f/9'), ('PhnkxzBrmeE', 's/6ac5f2043e5371d47f986d5f/7e99235ac14844e1b0e4a510f937bb4a3a5eebbae06ae8888dfdbe7eb6dec818?response-content-type=applic')]
+decode fail msgs: [('ing was written into output file, because at least one of its streams received no packets.', 98)]
+train unreadable by decord (av1 + h264 undecodable): 464 / 7110 videos 6.53 %; 3348 / 44151 steps 7.58 %
+val unreadable by decord (av1 + h264 undecodable): 20 / 510 videos 3.92 %; 117 / 2990 steps 3.91 %
+all: steps readable (est.) 43676

@@ -1,0 +1,55 @@
+{
+ "revision_now": "541f392c22573eec36ff677d9c93a4f4be829061",
+ "revision_index": "541f392c22573eec36ff677d9c93a4f4be829061",
+ "tars_hf": 113,
+ "tars_index": 113,
+ "size_differ": [],
+ "last_header_differ": [],
+ "members_index": 7453,
+ "end_le_size": true
+}
+{
+ "htstep_videos": {
+  "revision": "541f392c22573eec36ff677d9c93a4f4be829061",
+  "tars": 113,
+  "bytes": 179550023680,
+  "tar_bytes_min_med_max": [
+   18862080,
+   1960560640,
+   2576885760
+  ]
+ },
+ "val_repo": {
+  "revision": "1e37429fc917b29e759c2a5520cb5ce936989d25",
+  "mp4_files": 330,
+  "bytes": 7567371664,
+  "used_files": 329,
+  "used_bytes": 7562108023,
+  "unused_files": [
+   "part1/J2nZX27tbbo.f605.mp4"
+  ],
+  "unused_bytes": 5263641
+ },
+ "members_by_reason": {
+  "bytes_train": 172496232602,
+  "bytes_val": 3645724470,
+  "bytes_val_copy_in_val_repo": 3394064506,
+  "n_train": 7110,
+  "n_val": 181,
+  "n_val_copy_in_val_repo": 162
+ },
+ "val_videos_with_two_copies": 162,
+ "tars_with_needed_member": 112,
+ "need_bytes": {
+  "from_tars": 176141957072,
+  "from_val_repo": 7562108023,
+  "total": 183704065095
+ },
+ "all_bytes": 187117395344,
+ "split_videos": {
+  "train": 7110,
+  "val": 510,
+  "val_from_tar": 181,
+  "val_from_val_repo": 329
+ }
+}

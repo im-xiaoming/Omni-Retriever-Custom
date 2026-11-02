@@ -1,0 +1,301 @@
+{"tar": "videos/htstep_videos_4007.tar", "members": 82, "needed_videos": 82, "needed_steps": 558, "host": {"platform": "Windows-10-10.0.26200-SP0", "cpu_logical": 16, "cpu_physical": 8, "ram_gb": 15.4, "ram_free_gb": 3.6, "disk_free_gb": 48.3}}
+[a] tar downloaded: 1.97 GB in 464s
+[a] 1/82 6J0fRqR3FE4: 2 steps, fetch 0.72s, cut 2.45s | 477s
+[a] 2/82 5xsGpR7zHeQ: 17 steps, fetch 0.51s, cut 10.07s | 484s
+[a] 3/82 5quC17gTmLI: 6 steps, fetch 0.5s, cut 3.17s | 484s
+[a] 4/82 5naNOdqwgBg: 12 steps, fetch 0.1s, cut 9.65s | 487s
+[a] 5/82 62e_L1UbWEs: 4 steps, fetch 0.05s, cut 5.25s | 487s
+[a] 6/82 5xO7kvTmIiI: 12 steps, fetch 0.17s, cut 6.21s | 489s
+[a] 7/82 5o3xHYqVq0E: 6 steps, fetch 0.33s, cut 4.88s | 490s
+[a] 8/82 6Dq3n-LU6w8: 6 steps, fetch 0.06s, cut 5.71s | 493s
+[a] 9/82 65Q6IzUyvjc: 5 steps, fetch 0.05s, cut 4.75s | 494s
+[a] 10/82 5rUmkNeQczk: 10 steps, fetch 0.06s, cut 6.2s | 496s
+[a] 11/82 6DYHl43yxzY: 16 steps, fetch 0.05s, cut 8.08s | 501s
+[a] 12/82 65jEPDyDAxo: 9 steps, fetch 0.04s, cut 3.63s | 501s
+[a] 13/82 6KQ0jxhO0GY: 7 steps, fetch 0.04s, cut 3.98s | 501s
+[a] 14/82 69MhALrfs0Y: 5 steps, fetch 0.05s, cut 2.86s | 501s
+[a] 15/82 6LRqrQj0WXQ: 4 steps, fetch 0.06s, cut 3.66s | 504s
+[a] 16/82 6DSst17j_Tk: 1 steps, fetch 0.04s, cut 0.34s | 504s
+[a] 17/82 5sy5boTw1hM: 5 steps, fetch 0.06s, cut 1.45s | 504s
+[a] 18/82 6-sXPEuDBNg: 4 steps, fetch 0.12s, cut 2.67s | 504s
+[a] 19/82 61rfwX7H4eA: 10 steps, fetch 0.14s, cut 6.85s | 509s
+[a] 20/82 5ywsVsABgac: 6 steps, fetch 0.12s, cut 2.73s | 509s
+[a] 21/82 6HgjDaLH6Cc: 7 steps, fetch 0.03s, cut 4.95s | 509s
+[a] 22/82 5wfUAPGP4Qc: 6 steps, fetch 0.1s, cut 3.39s | 510s
+[a] 23/82 68EYtED_aZ0: 16 steps, fetch 0.03s, cut 4.55s | 513s
+[a] 24/82 5xGcYCEMc5w: 17 steps, fetch 0.02s, cut 5.3s | 515s
+[a] 25/82 6Eh-A0oaU5c: 27 steps, fetch 0.03s, cut 6.87s | 517s
+[a] 26/82 6BPCaD7og90: 12 steps, fetch 0.03s, cut 3.67s | 517s
+[a] 27/82 6D_DvQrWltw: 6 steps, fetch 0.02s, cut 3.67s | 518s
+[a] 28/82 644g24VtJ34: 5 steps, fetch 0.03s, cut 1.33s | 518s
+[a] 29/82 6-0u49Hd6Qg: 8 steps, fetch 0.04s, cut 4.12s | 521s
+[a] 30/82 6GNIQMLKukw: 2 steps, fetch 0.02s, cut 0.59s | 521s
+[a] 31/82 6144aW9h-ng: 9 steps, fetch 0.03s, cut 4.49s | 523s
+[a] 32/82 5uc9mlQ2sCg: 16 steps, fetch 0.03s, cut 4.37s | 523s
+[a] 33/82 5rUaQMoB0fo: 4 steps, fetch 0.03s, cut 2.31s | 524s
+[a] 34/82 6C09D_b96ag: 7 steps, fetch 0.02s, cut 2.66s | 525s
+[a] 35/82 67D0nVP49g0: 3 steps, fetch 0.02s, cut 2.1s | 525s
+[a] 36/82 6Db2TyxGoCA: 13 steps, fetch 0.02s, cut 4.5s | 528s
+[a] 37/82 66ODcz0fXy4: 9 steps, fetch 0.02s, cut 3.44s | 529s
+[a] 38/82 62Q39oRlUMQ: 3 steps, fetch 0.03s, cut 1.37s | 529s
+[a] 39/82 6BrHbfvgbCo: 3 steps, fetch 0.02s, cut 1.63s | 529s
+[a] 40/82 6GTUEKy0Ysc: 5 steps, fetch 0.02s, cut 1.3s | 529s
+[a] 41/82 5yqNbrNbyXY: 13 steps, fetch 0.03s, cut 3.89s | 532s
+[a] 42/82 5u97b1SqF1s: 26 steps, fetch 0.02s, cut 14.28s | 543s
+[a] 43/82 64Fv7n6MTXA: 3 steps, fetch 0.02s, cut 1.38s | 543s
+[a] 44/82 6CNyVXKbUCw: 6 steps, fetch 0.02s, cut 3.2s | 543s
+[a] 45/82 6-gX4Rptlv8: 6 steps, fetch 0.03s, cut 2.18s | 543s
+[a] 46/82 6MDrVtv5TYU: 9 steps, fetch 0.02s, cut 4.96s | 543s
+[a] 47/82 623TWw3AyN0: 5 steps, fetch 0.02s, cut 3.04s | 543s
+[a] 48/82 5xzuJjMG5b8: 5 steps, fetch 0.02s, cut 3.29s | 543s
+[a] 49/82 5w7t8YraMns: 3 steps, fetch 0.03s, cut 1.75s | 543s
+[a] 50/82 6HXshsb_ukU: 1 steps, fetch 0.01s, cut 0.43s | 543s
+[a] 51/82 68fHwgOwUrA: 8 steps, fetch 0.02s, cut 3.51s | 545s
+[a] 52/82 65cChny_M9I: 4 steps, fetch 0.02s, cut 2.53s | 545s
+[a] 53/82 5vFCNkijQKQ: 8 steps, fetch 0.02s, cut 2.98s | 546s
+[a] 54/82 5zx80_z7-Oo: 4 steps, fetch 0.02s, cut 1.59s | 546s
+[a] 55/82 66ZRZZS2X-w: 6 steps, fetch 0.02s, cut 2.11s | 547s
+[a] 56/82 6-XNJpDWZCA: 7 steps, fetch 0.02s, cut 4.63s | 550s
+[a] 57/82 6-l7XNOE7ao: 7 steps, fetch 0.02s, cut 1.94s | 550s
+[a] 58/82 6AWSeIlkugY: 2 steps, fetch 0.02s, cut 0.68s | 550s
+[a] 59/82 5srhNnU_iJY: 2 steps, fetch 0.01s, cut 0.71s | 550s
+[a] 60/82 6-jrbyTfKVo: 7 steps, fetch 0.02s, cut 1.83s | 550s
+[a] 61/82 6C27nUK7UkU: 4 steps, fetch 0.01s, cut 1.4s | 550s
+[a] 62/82 5qw3qq5k9QA: 10 steps, fetch 0.02s, cut 3.02s | 553s
+[a] 63/82 5rPbLaZf-Kw: 3 steps, fetch 0.02s, cut 1.0s | 553s
+[a] 64/82 6ADVLgyyDlo: 1 steps, fetch 0.01s, cut 1.23s | 553s
+[a] 65/82 6JkDD4986Ao: 1 steps, fetch 0.01s, cut 0.66s | 553s
+[a] 66/82 6Gxo9hXfe8c: 4 steps, fetch 0.01s, cut 2.03s | 553s
+[a] 67/82 62IO8n7ezCg: 5 steps, fetch 0.01s, cut 1.39s | 553s
+[a] 68/82 6-mt8up1F7A: 3 steps, fetch 0.02s, cut 1.25s | 554s
+[a] 69/82 6E6S3-BA41M: 3 steps, fetch 0.01s, cut 2.06s | 555s
+[a] 70/82 5pXwpGdB1Tg: 1 steps, fetch 0.01s, cut 0.87s | 555s
+[a] 71/82 60mj1fHhADo: 5 steps, fetch 0.01s, cut 1.22s | 555s
+[a] 72/82 5uxGIhWU5ls: 2 steps, fetch 0.01s, cut 0.33s | 555s
+[a] 73/82 69_GITSpIno: 9 steps, fetch 0.01s, cut 2.63s | 557s
+[a] 74/82 62MI9eK6YEE: 7 steps, fetch 0.01s, cut 1.39s | 557s
+[a] 75/82 65K1Orjw-4c: 7 steps, fetch 0.01s, cut 1.43s | 557s
+[a] 76/82 5mOfGfp7yFc: 4 steps, fetch 0.02s, cut 1.14s | 558s
+[a] 77/82 62D0pT4w8f4: 4 steps, fetch 0.01s, cut 1.53s | 558s
+[a] 78/82 5qk4ZEQ1YQk: 3 steps, fetch 0.01s, cut 1.01s | 558s
+[h264 @ 00000106a7e44ac0] mmco: unref short failure
+[h264 @ 00000106a7e44ac0] mmco: unref short failure
+[h264 @ 00000106a91670c0] mmco: unref short failure
+[h264 @ 00000106a91670c0] mmco: unref short failure
+[h264 @ 00000106ab0b4e80] mmco: unref short failure
+[buffer @ 00000106afe59f00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe59f00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe59f00] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacb480] Error applying options to the filter.
+[buffer @ 00000106afe58440] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58440] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58440] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacbb80] Error applying options to the filter.
+[buffer @ 00000106afe58280] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58280] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58280] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacce80] Error applying options to the filter.
+[buffer @ 00000106afe58e00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58e00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58e00] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacc580] Error applying options to the filter.
+[buffer @ 00000106afe58d40] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58d40] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58d40] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacb880] Error applying options to the filter.
+[buffer @ 00000106afe58e00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58e00] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58e00] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacc580] Error applying options to the filter.
+[buffer @ 00000106afe58440] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58440] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58440] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacc480] Error applying options to the filter.
+[buffer @ 00000106afe58100] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58100] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58100] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacb980] Error applying options to the filter.
+[buffer @ 00000106afe58380] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58380] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58380] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacce80] Error applying options to the filter.
+[buffer @ 00000106afe58840] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58840] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58840] Error setting option pix_fmt to value -1.
+[in @ 00000106aaaccb80] Error applying options to the filter.
+[buffer @ 00000106afe586c0] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe586c0] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe586c0] Error setting option pix_fmt to value -1.
+[in @ 00000106aaaccb80] Error applying options to the filter.
+[buffer @ 00000106afe58b80] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58b80] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58b80] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacb080] Error applying options to the filter.
+[buffer @ 00000106afe58900] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58900] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58900] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacbd80] Error applying options to the filter.
+[buffer @ 00000106afe58840] Unable to parse option value "-1" as pixel format
+[buffer @ 0000[a] 79/82 614d-Oi2ip0: 6 steps, fetch 0.01s, cut 1.19s | 559s
+[a] 80/82 6DGTIsQfGM4: 4 steps, fetch 0.01s, cut 2.39s | 561s
+[a] 81/82 5t3SrWk74L0: 5 steps, fetch 0.0s, cut 0.03s | 561s
+[a] 82/82 6FdIHkVlNoI: 10 steps, fetch 0.0s, cut 0.03s | 561s
+[h264 @ 0000026b447b4100] mmco: unref short failure
+0106afe58840] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe58840] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacc780] Error applying options to the filter.
+[buffer @ 00000106afe586c0] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe586c0] Unable to parse option value "-1" as pixel format
+[buffer @ 00000106afe586c0] Error setting option pix_fmt to value -1.
+[in @ 00000106aaacc280] Error applying options to the filter.
+{"mode": "a", "jobs": 3, "videos": 82, "steps": 558, "status": {"ok": 542, "past_end": 1, "unreadable": 15}, "fetch_errors": [], "wall_seconds": 562.2, "tar_download_seconds": 464.0, "cut_phase_wall_seconds": 97.7, "fetch_seconds_sum": 4.5, "mp4_bytes": 1971261216, "cut_seconds_sum": 251.3, "cut_cpu_seconds_sum": 351.6, "cut_seconds_per_video": {"50": 2.63, "90": 5.71, "100": 14.28}, "cut_seconds_per_step": {"mean": 0.45, "p50": 0.372, "p90": 0.845, "p99": 1.405, "p100": 2.013}, "disk_peak_bytes": 2489129739, "clip_bytes": 511101280, "clip_bytes_per_step": 942991, "peak_rss_mb_worker_max": 1205.4}
+[b] 1/82 6J0fRqR3FE4: 2 steps, fetch 27.49s, cut 2.0s | 41s
+[b] 2/82 5xsGpR7zHeQ: 17 steps, fetch 30.28s, cut 8.27s | 50s
+[b] 3/82 5quC17gTmLI: 6 steps, fetch 14.49s, cut 3.01s | 50s
+[b] 4/82 5naNOdqwgBg: 12 steps, fetch 24.3s, cut 8.27s | 62s
+[b] 5/82 62e_L1UbWEs: 4 steps, fetch 13.29s, cut 4.56s | 62s
+[b] 6/82 5xO7kvTmIiI: 12 steps, fetch 90.18s, cut 5.45s | 146s
+[b] 7/82 5o3xHYqVq0E: 6 steps, fetch 7.3s, cut 3.52s | 146s
+[b] 8/82 6Dq3n-LU6w8: 6 steps, fetch 12.6s, cut 4.58s | 146s
+[b] 9/82 65Q6IzUyvjc: 5 steps, fetch 12.97s, cut 3.34s | 146s
+[b] 10/82 5rUmkNeQczk: 10 steps, fetch 9.27s, cut 4.29s | 146s
+[b] 11/82 6DYHl43yxzY: 16 steps, fetch 27.81s, cut 5.69s | 146s
+[b] 12/82 65jEPDyDAxo: 9 steps, fetch 6.74s, cut 2.46s | 146s
+[b] 13/82 6KQ0jxhO0GY: 7 steps, fetch 7.82s, cut 2.79s | 146s
+[b] 14/82 69MhALrfs0Y: 5 steps, fetch 6.55s, cut 2.08s | 146s
+[b] 15/82 6LRqrQj0WXQ: 4 steps, fetch 28.27s, cut 2.89s | 151s
+[b] 16/82 6DSst17j_Tk: 1 steps, fetch 6.65s, cut 0.31s | 151s
+[b] 17/82 5sy5boTw1hM: 5 steps, fetch 5.88s, cut 1.65s | 151s
+[b] 18/82 6-sXPEuDBNg: 4 steps, fetch 15.53s, cut 2.74s | 154s
+[b] 19/82 61rfwX7H4eA: 10 steps, fetch 10.28s, cut 6.25s | 162s
+[b] 20/82 5ywsVsABgac: 6 steps, fetch 10.42s, cut 2.5s | 164s
+[b] 21/82 6HgjDaLH6Cc: 7 steps, fetch 8.15s, cut 4.68s | 167s
+[b] 22/82 5wfUAPGP4Qc: 6 steps, fetch 6.03s, cut 3.71s | 172s
+[b] 23/82 68EYtED_aZ0: 16 steps, fetch 10.6s, cut 4.66s | 179s
+[b] 24/82 5xGcYCEMc5w: 17 steps, fetch 22.0s, cut 5.69s | 194s
+[b] 25/82 6Eh-A0oaU5c: 27 steps, fetch 6.67s, cut 7.3s | 194s
+[b] 26/82 6BPCaD7og90: 12 steps, fetch 4.17s, cut 4.05s | 194s
+[b] 27/82 6D_DvQrWltw: 6 steps, fetch 9.7s, cut 4.17s | 200s
+[b] 28/82 644g24VtJ34: 5 steps, fetch 5.12s, cut 1.57s | 200s
+[b] 29/82 6-0u49Hd6Qg: 8 steps, fetch 12.08s, cut 4.36s | 210s
+[b] 30/82 6GNIQMLKukw: 2 steps, fetch 4.74s, cut 0.69s | 210s
+[b] 31/82 6144aW9h-ng: 9 steps, fetch 5.61s, cut 4.76s | 210s
+[b] 32/82 5uc9mlQ2sCg: 16 steps, fetch 9.22s, cut 4.55s | 214s
+[h264 @ 0000021a3b855240] mmco: unref short failure
+[buffer @ 0000021a3dd3b580] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b580] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b580] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e6c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b4c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b4c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b4c0] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652fcc0] Error applying options to the filter.
+[buffer @ 0000021a3dd3ba80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ba80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ba80] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652ebc0] Error applying options to the filter.
+[buffer @ 0000021a3dd3ad80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ad80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ad80] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e6c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3ba80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ba80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ba80] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e9c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b8c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b8c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b8c0] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e4c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3ae40] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ae40] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ae40] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652ecc0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b800] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b800] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b800] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e7c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3ad80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ad80] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3ad80] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652edc0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b680] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b680] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b680] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652f8c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b400] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b400] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b400] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652e2c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b240] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b240] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b240] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652f9c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b400] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b400] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b400] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652f2c0] Error applying options to the filter.
+[buffer @ 0000021a3dd3b240] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b240] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b240] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652fec0] Error applying options to the filter.
+[buffer @ 00[b] 33/82 5rUaQMoB0fo: 4 steps, fetch 222.15s, cut 1.94s | 434s
+[b] 34/82 6C09D_b96ag: 7 steps, fetch 4.41s, cut 2.72s | 434s
+[b] 35/82 67D0nVP49g0: 3 steps, fetch 4.6s, cut 2.08s | 434s
+[b] 36/82 6Db2TyxGoCA: 13 steps, fetch 4.52s, cut 4.7s | 434s
+[b] 37/82 66ODcz0fXy4: 9 steps, fetch 5.51s, cut 3.22s | 434s
+[b] 38/82 62Q39oRlUMQ: 3 steps, fetch 4.06s, cut 1.17s | 434s
+[b] 39/82 6BrHbfvgbCo: 3 steps, fetch 6.21s, cut 1.49s | 434s
+[b] 40/82 6GTUEKy0Ysc: 5 steps, fetch 8.16s, cut 1.18s | 434s
+[b] 41/82 5yqNbrNbyXY: 13 steps, fetch 5.27s, cut 3.41s | 434s
+[b] 42/82 5u97b1SqF1s: 26 steps, fetch 4.29s, cut 10.1s | 434s
+[b] 43/82 64Fv7n6MTXA: 3 steps, fetch 5.29s, cut 1.22s | 434s
+[b] 44/82 6CNyVXKbUCw: 6 steps, fetch 3.88s, cut 2.48s | 434s
+[b] 45/82 6-gX4Rptlv8: 6 steps, fetch 7.92s, cut 1.44s | 434s
+[b] 46/82 6MDrVtv5TYU: 9 steps, fetch 4.12s, cut 3.83s | 434s
+[b] 47/82 623TWw3AyN0: 5 steps, fetch 21.83s, cut 2.11s | 434s
+[b] 48/82 5xzuJjMG5b8: 5 steps, fetch 3.23s, cut 2.26s | 434s
+[b] 49/82 5w7t8YraMns: 3 steps, fetch 3.22s, cut 1.2s | 434s
+[b] 50/82 6HXshsb_ukU: 1 steps, fetch 3.09s, cut 0.3s | 434s
+[b] 51/82 68fHwgOwUrA: 8 steps, fetch 3.03s, cut 2.41s | 434s
+[b] 52/82 65cChny_M9I: 4 steps, fetch 3.9s, cut 1.81s | 434s
+[b] 53/82 5vFCNkijQKQ: 8 steps, fetch 2.77s, cut 2.16s | 434s
+[b] 54/82 5zx80_z7-Oo: 4 steps, fetch 2.99s, cut 1.11s | 434s
+[b] 55/82 66ZRZZS2X-w: 6 steps, fetch 3.01s, cut 1.56s | 434s
+[b] 56/82 6-XNJpDWZCA: 7 steps, fetch 9.28s, cut 3.27s | 434s
+[b] 57/82 6-l7XNOE7ao: 7 steps, fetch 3.12s, cut 1.39s | 434s
+[b] 58/82 6AWSeIlkugY: 2 steps, fetch 3.05s, cut 0.51s | 434s
+[b] 59/82 5srhNnU_iJY: 2 steps, fetch 2.7s, cut 0.52s | 434s
+[b] 60/82 6-jrbyTfKVo: 7 steps, fetch 4.29s, cut 1.36s | 434s
+[b] 61/82 6C27nUK7UkU: 4 steps, fetch 3.76s, cut 0.97s | 434s
+[b] 62/82 5qw3qq5k9QA: 10 steps, fetch 2.83s, cut 2.11s | 434s
+[b] 63/82 5rPbLaZf-Kw: 3 steps, fetch 2.66s, cut 0.7s | 434s
+[b] 64/82 6ADVLgyyDlo: 1 steps, fetch 2.75s, cut 0.8s | 434s
+[b] 65/82 6JkDD4986Ao: 1 steps, fetch 6.89s, cut 0.44s | 434s
+[b] 66/82 6Gxo9hXfe8c: 4 steps, fetch 2.77s, cut 1.39s | 434s
+[b] 67/82 62IO8n7ezCg: 5 steps, fetch 4.05s, cut 1.2s | 434s
+[b] 68/82 6-mt8up1F7A: 3 steps, fetch 5.0s, cut 1.01s | 434s
+[b] 69/82 6E6S3-BA41M: 3 steps, fetch 2.47s, cut 1.57s | 434s
+[b] 70/82 5pXwpGdB1Tg: 1 steps, fetch 2.71s, cut 0.62s | 434s
+[b] 71/82 60mj1fHhADo: 5 steps, fetch 2.87s, cut 0.95s | 434s
+[b] 72/82 5uxGIhWU5ls: 2 steps, fetch 3.33s, cut 0.28s | 434s
+[b] 73/82 69_GITSpIno: 9 steps, fetch 4.68s, cut 1.83s | 434s
+[b] 74/82 62MI9eK6YEE: 7 steps, fetch 2.14s, cut 0.95s | 434s
+[b] 75/82 65K1Orjw-4c: 7 steps, fetch 2.33s, cut 1.04s | 434s
+[b] 76/82 5mOfGfp7yFc: 4 steps, fetch 2.1s, cut 0.88s | 434s
+[b] 77/82 62D0pT4w8f4: 4 steps, fetch 3.17s, cut 1.13s | 434s
+[b] 78/82 5qk4ZEQ1YQk: 3 steps, fetch 1.8s, cut 0.73s | 434s
+[b] 79/82 614d-Oi2ip0: 6 steps, fetch 2.25s, cut 0.84s | 434s
+[b] 80/82 6DGTIsQfGM4: 4 steps, fetch 1.95s, cut 1.63s | 434s
+[b] 81/82 5t3SrWk74L0: 5 steps, fetch 1.42s, cut 0.02s | 434s
+[b] 82/82 6FdIHkVlNoI: 10 steps, fetch 1.13s, cut 0.02s | 434s
+[h264 @ 000001f942fd5c40] mmco: unref short failure
+[h264 @ 000001f942fd5c40] mmco: unref short failure
+[h264 @ 000001f95f0599c0] mmco: unref short failure
+[h264 @ 000001f95f0599c0] mmco: unref short failure
+[h264 @ 000001f9489b7940] mmco: unref short failure
+00021a3dd3b8c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b8c0] Unable to parse option value "-1" as pixel format
+[buffer @ 0000021a3dd3b8c0] Error setting option pix_fmt to value -1.
+[in @ 0000021a3652eac0] Error applying options to the filter.
+{"mode": "b", "jobs": 3, "videos": 82, "steps": 558, "status": {"ok": 542, "past_end": 1, "unreadable": 15}, "fetch_errors": [], "wall_seconds": 435.1, "tar_download_seconds": 0.0, "cut_phase_wall_seconds": 435.0, "fetch_seconds_sum": 897.2, "mp4_bytes": 1971261216, "cut_seconds_sum": 210.9, "cut_cpu_seconds_sum": 300.3, "cut_seconds_per_video": {"50": 2.08, "90": 4.76, "100": 10.1}, "cut_seconds_per_step": {"mean": 0.378, "p50": 0.321, "p90": 0.701, "p99": 1.142, "p100": 1.754}, "disk_peak_bytes": 532565574, "clip_bytes": 511101280, "clip_bytes_per_step": 942991, "peak_rss_mb_worker_max": 1170.9}
+a_equals_b {"steps": 558, "differ": []}
