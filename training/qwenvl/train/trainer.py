@@ -1056,6 +1056,9 @@ class QwenVLTrainer(Trainer):
         if hasattr(self.optimizer, "train") and callable(self.optimizer.train):
             self.optimizer.train()
 
+        if getattr(self.args, "grad_cache_chunk", 0) > 0:
+            return self._grad_cache_training_step(model, inputs)
+
         inputs = self._prepare_inputs(inputs)
         if is_sagemaker_mp_enabled():
             loss_mb = smp_forward_backward(model, inputs, self.args.gradient_accumulation_steps)
@@ -1128,6 +1131,31 @@ class QwenVLTrainer(Trainer):
 
             self._consecutive_ooms = 0
             return loss.detach(), obj1_loss.detach(), obj2_loss.detach(), obj3_loss.detach()
+
+    def _grad_cache_training_step(self, model, inputs):
+        """GradCache over the B items of the batch (``--grad_cache_chunk K``, InstanceCollator), pairwise loss with
+        the same-text mask; see qwenvl/train/grad_cache.py. Returns the loss, v2t (obj1) and t2v (obj3) losses."""
+        from qwenvl.data.data_qwen import DataCollatorForOmniDataset
+        from qwenvl.train.grad_cache import grad_cache_step
+
+        collate = DataCollatorForOmniDataset()
+        ga = self.args.gradient_accumulation_steps
+        try:
+            out = grad_cache_step(
+                model, inputs["instances"], collate, self._prepare_inputs, self.args.grad_cache_chunk,
+                self.args.temperature, self.args.mask_same_text, backward=self.accelerator.backward,
+                autocast=self.compute_loss_context_manager, scale=1.0 / ga)
+        except torch.cuda.OutOfMemoryError:
+            model.zero_grad(set_to_none=True)   # chunks already backpropagated must not reach the optimiser step
+            self._on_oom("grad-cache batch")
+            zero = torch.tensor(0.0, device=self.args.device)
+            return zero, zero, zero, zero
+        self._consecutive_ooms = 0
+        logger.info(f"[gc] step {self.state.global_step + 1} loss={out['loss'].item():.4f} "
+                    f"v2t={out['v2t_loss'].item():.4f} t2v={out['t2v_loss'].item():.4f} "
+                    f"masked_pairs={out['masked_pairs']}")
+        zero = torch.zeros((), device=out["loss"].device)
+        return out["loss"] / ga, out["v2t_loss"] / ga, zero, out["t2v_loss"] / ga
 
 
     def _maybe_log_save_evaluate(

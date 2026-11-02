@@ -72,6 +72,7 @@ _SRC_ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..",
 if os.path.isdir(_SRC_ROOT) and os.path.abspath(_SRC_ROOT) not in sys.path:
     sys.path.insert(0, os.path.abspath(_SRC_ROOT))
 from omniretriever.data.media import fit_waveform, load_audio_segment
+from omniretriever.data.clip import load_clip
 
 def is_rank_zero():
     if torch.distributed.is_available() and torch.distributed.is_initialized():
@@ -497,6 +498,17 @@ class LazySupervisedDataset(Dataset):
         video_proc["video_second_per_grid"] = [self.data_args.image_processor.temporal_patch_size / fps[i] for i in range(len(fps))]
         return video_proc["pixel_values_videos"], video_proc['video_grid_thw'], video_proc["video_second_per_grid"]
 
+    def process_clip(self, clip_file):
+        """A pre-cut clip (scripts/precut_htstep.py): the frames video_decord would pick, already resized by the
+        processor's own resize, so the processor runs with do_resize=False. Returns video_decord's outputs and the
+        event audio (None = the video has no audio)."""
+        clip = load_clip(clip_file)
+        video_proc = self.data_args.image_processor(
+            images=None, videos=torch.from_numpy(clip["frames"]), do_resize=False, return_tensors="pt")
+        fps = clip["n_frames"] / clip["video_length"]
+        second_per_grid = [self.data_args.image_processor.temporal_patch_size / fps]
+        return video_proc["pixel_values_videos"], video_proc['video_grid_thw'], second_per_grid, clip["wav"]
+
     def process_omni_conversations(self, conversations, type, gpt="gpt"):
         label = None
         omni_conversations = []
@@ -743,6 +755,13 @@ class LazySupervisedDataset(Dataset):
                 else:
                     raise NotImplementedError
 
+            elif "clip" in sources[0]:
+                clip_file = resolve_media_path(sources[0]["clip"], "CLIP_ROOT")
+                video, video_grid_thw, second_per_grid_ts, clip_wav = self.process_clip(clip_file)
+                video = [video]
+                video_grid_thw_merged = [copy.deepcopy(video_grid_thw)]
+                video_grid_thw = [video_grid_thw]
+
             elif "video" in sources[0]:
                 _raw_video = sources[0]["video"]
                 timestamps = sources[0].get("timestamps", None)
@@ -786,6 +805,14 @@ class LazySupervisedDataset(Dataset):
                     target_len = int(max(fixed_audio_duration, 1) * 16000)
                     silence = np.zeros(target_len, dtype=np.float32)
                     audio, audio_lengths, raw_wav = self.process_audio(audio_wav=silence)
+            elif "clip" in sources[0]:
+                # Same as the video-only branch below: the clip holds the event audio already cut, None when the
+                # cut failed (no audio stream), which that branch also turns into silence.
+                if clip_wav is not None and len(clip_wav):
+                    audio, audio_lengths, raw_wav = self.process_audio(audio_wav=clip_wav)
+                else:
+                    target_len = int(max(fixed_audio_duration, 1) * 16000)
+                    audio, audio_lengths, raw_wav = self.process_audio(audio_wav=np.zeros(target_len, dtype=np.float32))
             elif isinstance(video_file, str) and "video" in sources[0]:
                 # Video-only record: the event's audio is cut out of the same
                 # video over the same [start, end] window as its frames.
@@ -908,6 +935,9 @@ class LazySupervisedDataset(Dataset):
                 "pos_video_grid_thw": pos_video_grid_thw[0] if pos_video_grid_thw is not None else None,
                 "pos_video_second_per_grid": pos_second_per_grid_ts,
                 "input_raw_wav": torch.from_numpy(raw_wav[0]) if raw_wav is not None else None,
+                # carried to the loss for the same-text negative mask (trainer --mask_same_text)
+                "text": sources[0].get("text"),
+                "id": sources[0].get("id"),
             }
 
             # TupleInfoNCE: augmented video/audio/text + sub-modal inputs
@@ -1258,6 +1288,9 @@ class DataCollatorForOmniDataset(object):
             "aug_input_raw_wav": aug_input_raw_wav,
             **submodal_batch,
         }
+        if any(instance.get("text") is not None for instance in instances):
+            batch["texts"] = [instance.get("text") for instance in instances]
+            batch["ids"] = [instance.get("id") for instance in instances]
 
         return batch
 

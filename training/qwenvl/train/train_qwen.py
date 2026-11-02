@@ -211,7 +211,7 @@ def set_model(model_args, model):
 def train(attn_implementation="flash_attention_2"):
     global local_rank
 
-    seed = 2025
+    seed = int(os.environ.get("TRAIN_SEED", 2025))   # HT-Step LoRA runs set 42 (OMNI_HTSTEP_LORA.md section 1)
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -249,6 +249,11 @@ def train(attn_implementation="flash_attention_2"):
 
     rank0_print(f"[2/5] Building dataset and dataloader from {data_args.dataset_use}...")
     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
+    if training_args.grad_cache_chunk > 0:
+        if model_args.use_tuple_infonce:
+            raise ValueError("grad_cache_chunk > 0 trains the pairwise loss: set use_tuple_infonce False")
+        from qwenvl.train.grad_cache import InstanceCollator
+        data_module["data_collator"] = InstanceCollator()
 
     if not data_args.run_test:
         rank0_print(f"[3/5] Loading base model config & weights from {model_args.model_name_or_path}...")
@@ -462,9 +467,21 @@ def train(attn_implementation="flash_attention_2"):
                 or len(_local_ckpts_for_skip) == 0
             )
         )
+        callbacks = [LossProgressCallback()]
+        if training_args.eval_manifest:
+            from qwenvl.train.retrieval_eval import RetrievalEvalCallback, eval_dataset
+            n_train = len(data_module["train_dataset"])
+            per_step = training_args.per_device_train_batch_size * training_args.gradient_accumulation_steps
+            every = max(1, int(-(-n_train // per_step) * training_args.eval_every_frac))
+            track = (eval_dataset(training_args.track_manifest, data_args, tokenizer)
+                     if training_args.track_manifest else None)
+            callbacks.append(RetrievalEvalCallback(
+                model, eval_dataset(training_args.eval_manifest, data_args, tokenizer), training_args.output_dir,
+                every, training_args.early_stop_patience, track, training_args.hf_run_repo, training_args.run_name))
+            rank0_print(f"[eval] {training_args.eval_manifest}: every {every} optimiser steps")
         trainer = QwenVLTrainer(
             model=model, processing_class=tokenizer, args=training_args,
-            callbacks=[LossProgressCallback()],
+            callbacks=callbacks,
             skip_deepspeed_load=_skip_ds_load,
             **data_module,
         )
@@ -643,4 +660,4 @@ def train(attn_implementation="flash_attention_2"):
         return
 
 if __name__ == "__main__":
-    train(attn_implementation="sdpa")
+    train(attn_implementation=os.environ.get("ATTN_IMPL", "sdpa"))

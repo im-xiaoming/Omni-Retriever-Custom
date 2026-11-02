@@ -127,7 +127,9 @@ if [ ! -e "${DATA_PATH}" ]; then
   exit 1
 fi
 
-if command -v deepspeed &>/dev/null; then
+# USE_DEEPSPEED=False forces the plain python launch (one GPU; needed by --grad_cache_chunk, whose several backward
+# passes per optimiser step DeepSpeed's engine does not expect).
+if [ "${USE_DEEPSPEED:-auto}" != "False" ] && command -v deepspeed &>/dev/null; then
   echo "Chạy với DeepSpeed (GPUs: ${NUM_GPUS}, Port: ${MASTER_PORT})..."
   deepspeed --num_gpus="${NUM_GPUS}" --master_port="${MASTER_PORT}" \
     "${REPO_ROOT}/qwenvl/train/train_qwen.py" \

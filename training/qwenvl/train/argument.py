@@ -90,4 +90,13 @@ class TrainingArguments(transformers.TrainingArguments):
     use_type_sampler: bool = field(default=False)
     warmup_ratio: float = field(default=0.03)
     past_index: int = field(default=-1)
+    # HT-Step LoRA (OMNI_HTSTEP_LORA.md section 4); all off by default, so YouCookII runs are unchanged
+    grad_cache_chunk: int = field(default=0, metadata={"help": "> 0: GradCache with chunks of this many items over "
+                                  "the per-device batch, pairwise loss computed in the trainer (qwenvl/train/grad_cache.py)"})
+    mask_same_text: bool = field(default=True, metadata={"help": "grad_cache only: drop negatives with the same text"})
+    eval_manifest: str = field(default="", metadata={"help": "retrieval validation manifest scored during training"})
+    eval_every_frac: float = field(default=0.25, metadata={"help": "validate every this fraction of an epoch"})
+    early_stop_patience: int = field(default=3, metadata={"help": "stop after this many evals without a better R@1"})
+    track_manifest: str = field(default="", metadata={"help": "forgetting track (benchmark subset), scored every epoch"})
+    hf_run_repo: str = field(default="", metadata={"help": "HF repo to upload the best LoRA and metrics.json to"})
 
