@@ -1,0 +1,3 @@
+data/htstep/** -text
+configs/omni_htstep_lora_protocol.json -text
+*.sh text eol=lf
