@@ -79,7 +79,6 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=1)
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--dtype", type=str, default="bfloat16" if torch.cuda.is_available() else "float32")
-    parser.add_argument("--name", type=str, default="YouCookII", help="dataset name in the printed table")
     return parser.parse_args()
 
 
@@ -129,7 +128,7 @@ def main():
     os.environ["BEATS_PATH"] = args.beats_path
 
     print("=" * 65)
-    print(f"  OmniRetriever Evaluation on {args.name} Validation Set")
+    print("  OmniRetriever Evaluation on YouCookII Validation Set")
     print("=" * 65)
     print(f"Base Model    : {args.base_model}")
     print(f"Adapter       : {args.adapter}")
@@ -173,11 +172,6 @@ def main():
         model = PeftModel.from_pretrained(model, args.adapter)
 
     model = model.to(args.device).eval()
-    cuda = args.device.startswith("cuda")
-    gb = lambda b: round(b / 2 ** 30, 3)  # noqa: E731
-    after_load_gb = gb(torch.cuda.max_memory_allocated()) if cuda else None
-    if cuda:
-        torch.cuda.reset_peak_memory_stats()
 
     # 3. Load Validation Dataset
     print("\n[3/4] Preparing Dataset...")
@@ -205,7 +199,6 @@ def main():
     # too, which keeps ids aligned with the embeddings.
     manifest_ids = [rec.get("id") for rec in dataset.list_data_dict]
 
-    t_extract = time.time()
     with torch.inference_mode():
         for batch_idx, batch in enumerate(tqdm(dataloader, desc="Extracting")):
             if batch is None:
@@ -250,7 +243,6 @@ def main():
                 t_emb = t_emb / torch.norm(t_emb, dim=-1, keepdim=True).clamp(min=1e-12)
                 text_embeds_list.append(t_emb)
 
-    extract_sec = time.time() - t_extract
     text_all = torch.cat(text_embeds_list, dim=0).numpy()
     mllm_all = torch.cat(mllm_embeds_list, dim=0).numpy()
 
@@ -272,27 +264,19 @@ def main():
         "text_to_multimodal (t2m)": {k: round(v * 100 if k.startswith("R@") or k == "MRR" else v, 2) for k, v in metrics_t2m.items()},
         "multimodal_to_text (m2t)": {k: round(v * 100 if k.startswith("R@") or k == "MRR" else v, 2) for k, v in metrics_m2t.items()},
         "num_samples": len(text_all),
-        "ndcg@10_pct": {"t2m": round(metrics_t2m["NDCG@10"] * 100, 2), "m2t": round(metrics_m2t["NDCG@10"] * 100, 2)},
-        "vram_gb": {"after_load": after_load_gb,
-                    "eval_peak_allocated": gb(torch.cuda.max_memory_allocated()) if cuda else None,
-                    "eval_peak_reserved": gb(torch.cuda.max_memory_reserved()) if cuda else None},
-        "ms_per_item": round(1000 * extract_sec / max(len(text_all), 1), 1),
     }
 
     print("\n" + "=" * 65)
-    print(f"               KẾT QUẢ ĐÁNH GIÁ {args.name.upper()} (VAL)")
+    print("               KẾT QUẢ ĐÁNH GIÁ YOUCOOKII (VAL)")
     print("=" * 65)
     print(f"{'Chỉ số':<15} | {'Text -> Video (t2m)':<22} | {'Video -> Text (m2t)':<22}")
     print("-" * 65)
     print(f"{'Recall@1':<15} | {results['text_to_multimodal (t2m)']['R@1']:>18.2f}% | {results['multimodal_to_text (m2t)']['R@1']:>18.2f}%")
     print(f"{'Recall@5':<15} | {results['text_to_multimodal (t2m)']['R@5']:>18.2f}% | {results['multimodal_to_text (m2t)']['R@5']:>18.2f}%")
     print(f"{'Recall@10':<15} | {results['text_to_multimodal (t2m)']['R@10']:>18.2f}% | {results['multimodal_to_text (m2t)']['R@10']:>18.2f}%")
-    print(f"{'NDCG@10':<15} | {results['ndcg@10_pct']['t2m']:>18.2f}% | {results['ndcg@10_pct']['m2t']:>18.2f}%")
     print(f"{'MRR':<15} | {results['text_to_multimodal (t2m)']['MRR']:>18.2f}% | {results['multimodal_to_text (m2t)']['MRR']:>18.2f}%")
     print(f"{'Median Rank':<15} | {results['text_to_multimodal (t2m)']['median_rank']:>20} | {results['multimodal_to_text (m2t)']['median_rank']:>20}")
     print("=" * 65)
-    print(f"VRAM (GB): sau khi load {after_load_gb} | đỉnh khi eval {results['vram_gb']['eval_peak_allocated']} "
-          f"(reserved {results['vram_gb']['eval_peak_reserved']}) | {results['ms_per_item']} ms / item")
 
     out_p = Path(args.output)
     out_p.parent.mkdir(parents=True, exist_ok=True)

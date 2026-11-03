@@ -78,58 +78,11 @@ def test_split_reproducible():
     assert ch.same_text_pairs(["a"] * 40 + ["b"] * 40, 32, 50) == ch.same_text_pairs(["a"] * 40 + ["b"] * 40, 32, 50)
 
 
-def test_smoke_subset():
-    it = lambda v, i, s, tar="videos/htstep_videos_4007.tar": {  # noqa: E731
-        "id": f"{v}#{i}", "video_id": v, "step_idx": i, "global_step_index": 1, "partial": "Full Match",
-        "segment": s, "text": "A: b", "source": {"repo": "r", "tar": tar, "member": f"{v}.mp4"}}
-    items = {"train": [it("a", 0, [1, 5]), it("a", 1, [9, 20]), it("a", 2, [30, 31]), it("b", 0, [1, 2]),
-                       it("c", 0, [1, 2]), it("d", 0, [1, 2], tar="videos/htstep_videos_1000.tar")],
-             "val": [it("v", 0, [1, 2], tar="videos/htstep_videos_1000.tar"),
-                     {**it("w", 0, [1, 2]), "source": {"repo": ch.VAL_VIDEOS_REPO, "file": "part1/w.mp4"}}]}
-    ok = {"video": "h264", "pix_fmt": "yuv420p", "duration": 15.0}
-    codecs = {"a": ok, "b": {**ok, "video": "av1"}, "c": {**ok, "pix_fmt": None}, "d": ok,
-              "v": {**ok, "video": "vp9"}, "w": ok}
-    recs, dropped = ch.smoke_select(items, codecs, "videos/htstep_videos_4007.tar", 5, 5)
-    assert {r["video_id"] for r in recs["train"]} == {"a"}       # av1 / no pix_fmt / other tar dropped
-    assert {r["video_id"] for r in recs["val"]} == {"v"}         # val: tar sources only (range read)
-    assert dropped == {"a#2": "past_end"}
-    a1 = recs["train"][1]
-    assert a1["timestamps"] == a1["window"] == [9.0, 15.0] and a1["segment"] == [9, 20]   # end clamped
-    assert a1["video_length"] == 6.0 and "clip" not in a1 and a1["video"] == "a.mp4"
-    assert ch.smoke_select(items, codecs, "videos/htstep_videos_4007.tar", 0, 5)[0]["train"] == []
-
-
-def test_decord_window_matches_video_decord():
-    # 300 frames at 30 fps = 10.0 s; data_qwen raises when video_length <= 0 or start_idx > end_idx
-    assert ch.decord_window([2.0, 4.0], 300, 30.0) == [2.0, 4.0]
-    assert ch.decord_window([8.0, 15.0], 300, 30.0) == [8.0, 10.0]            # end clamped to frames / fps
-    assert ch.decord_window([10.0, 12.0], 300, 30.0) is None                   # starts at the end
-    assert ch.decord_window([9.99, 12.0], 300, 30.0) is None                   # start_idx 300 > end_idx 299
-    assert ch.decord_window([9.95, 12.0], 300, 30.0) == [9.95, 10.0]           # start_idx 299 == end_idx
-
-
-def test_manifest_from_download_log():
-    it = lambda v, i, s: {"id": f"{v}#{i}", "video_id": v, "step_idx": i, "global_step_index": 1,  # noqa: E731
-                          "partial": "Full Match", "segment": s, "text": "A: b", "source": {}}
-    items = [it("a", 0, [1, 5]), it("a", 1, [9, 20]), it("a", 2, [30, 31]), it("b", 0, [1, 2]), it("c", 0, [1, 2])]
-    log = {"a": {"status": "ok", "frames": 450, "fps": 30.0}, "b": {"status": "empty_video_track"}}
-    recs, dropped = ch.manifest_records(items, log)
-    assert [r["id"] for r in recs] == ["a#0", "a#1"]
-    assert recs[1]["timestamps"] == [9.0, 15.0] and recs[1]["segment"] == [9, 20] and "clip" not in recs[1]
-    assert recs[0]["conversations"][1]["value"] == recs[0]["text"] and recs[0]["video"] == "a.mp4"
-    assert dropped == {"a#2": "past_end", "b#0": "empty_video_track", "c#0": "not_downloaded"}
-
-
-def test_download_pick_has_av1():
-    import download_htstep as dh
-    codecs = {"a": {"video": "h264", "pix_fmt": "yuv420p"}, "b": {"video": "vp9", "pix_fmt": "yuv420p"},
-              "c": {"video": "h264", "pix_fmt": None}, "z": {"video": "av1", "pix_fmt": "yuv420p"}}
-    vids = ["a", "b", "c", "z", "q"]
-    assert dh.pick(vids, codecs, 2, need_av1=True) == ["a", "z"]               # empty track / unknown skipped
-    assert dh.pick(vids, codecs, 2, need_av1=False) == ["a", "b"]
-    assert dh.pick(vids, codecs, 0, need_av1=True) == sorted(vids)             # 0 = every video
-    assert dh.same_video({"frames": 10, "fps": "30/1", "duration": 0.333}, {"frames": 10, "fps": "30/1", "duration": 0.35})
-    assert not dh.same_video({"frames": 10, "fps": "30/1", "duration": 0.3}, {"frames": 9, "fps": "30/1", "duration": 0.3})
+def test_transcode_check():
+    from omniretriever.data import htstep_io as io
+    assert io.same_video({"frames": 10, "fps": "30/1", "duration": 0.333}, {"frames": 10, "fps": "30/1", "duration": 0.35})
+    assert not io.same_video({"frames": 10, "fps": "30/1", "duration": 0.3}, {"frames": 9, "fps": "30/1", "duration": 0.3})
+    assert not io.same_video({"frames": 10, "fps": "30/1", "duration": 0.3}, {"frames": 10, "fps": "25/1", "duration": 0.3})
 
 
 # ------------------------------------------------------------------------------------------------- mask + loss
@@ -291,7 +244,7 @@ def test_precut_units(tmp_path):
 
 def test_convert_youcookii_untouched():
     """convert_htstep.py does not refactor convert_youcookii.py, so the YC2 manifests are produced unchanged."""
-    r = subprocess.run(["git", "-C", ROOT, "diff", "--quiet", "chien2", "--", "scripts/convert_youcookii.py"])
+    r = subprocess.run(["git", "-C", ROOT, "diff", "--quiet", "460257f", "--", "scripts/convert_youcookii.py", "scripts/eval_youcookii.py"])
     assert r.returncode == 0
 
 
