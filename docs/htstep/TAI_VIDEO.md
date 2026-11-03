@@ -1,5 +1,7 @@
 # Tải mp4 HT-Step và cắt clip: kiểm kê, đo, ước lượng
 
+> Các script đo trong báo cáo này (`inventory_htstep_videos.py`, `bench_precut_one_tar.py`, `probe_codecs_htstep.py`) đã xoá ở commit `f81a242`; số liệu vẫn đúng. `range_get` chuyển sang `src/omniretriever/data/htstep_io.py`.
+
 Ngày: 2026-11-02. Phạm vi: chỉ kiểm tra và đo, **không** cắt toàn bộ dữ liệu, không sửa plan
 (`OMNI_HTSTEP_LORA.md` mục 2.2 / 3). Nhãn:
 - **[đo thực tế]**: số lấy từ script trong phụ lục. Output nằm ở `docs/htstep/tai_video/`.
