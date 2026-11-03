@@ -147,3 +147,23 @@ Phần có sẵn từ trước, giữ nguyên:
 ### Chưa chạy (cần Colab)
 
 Toàn bộ hai notebook. Gửi lại: thư mục `precut/` trên Drive (bước 1) và `summary.json`, `chunk.json`, `vram_probe.json`, `ckpt/metrics.json` (bước 2), theo `HUONG_DAN_COLAB.md`.
+
+## 2026-11-03 (2): yêu cầu cập nhật, repo clip của user
+
+Yêu cầu sửa mục 3 / 7 / 8:
+
+- Repo clip là repo dataset **private trong tài khoản của user**, do user tự tạo, dùng token Write của chính tài khoản đó.
+- Không ghi vào repo HF nào khác; `nguyenminh04/*` chỉ đọc.
+- Hướng dẫn phải có cách tạo repo, tạo token và đặt Secrets.
+
+User đã tạo `GraceFeel/htstep-omni-clips`. Kiểm qua API công khai lúc 2026-11-03: repo có `"private": false`, nội dung chỉ có `.gitattributes`. Cần chuyển sang private trước khi chạy; ô 1 sẽ dừng nếu chưa.
+
+| File | Việc |
+| --- | --- |
+| `scripts/precut_htstep.py` `check_clip_repo`, lệnh `check-repo` | Bỏ `create_repo`, nên pipeline không bao giờ tạo repo. Trước khi ghi, kiểm: repo đã có, private, owner = tài khoản của `HF_TOKEN`, token không phải Read. `run` gọi kiểm này đầu tiên |
+| `notebooks/omni_htstep_precut.ipynb` ô 0, 1 | `HF_CLIPS = "GraceFeel/htstep-omni-clips"` (ở ô cấu hình, không có trong script). Ô 1 chạy `check-repo` và dừng nếu sai |
+| `notebooks/omni_htstep_train.ipynb` ô 0, 6 | Cùng `HF_CLIPS`. Bỏ tuỳ chọn `HF_RUN_REPO` / `--hf_run_repo`, vì nó sẽ tạo và ghi một repo HF thứ hai. Code `hf_run_repo` của `RetrievalEvalCallback` vẫn còn nhưng mặc định rỗng và notebook không dùng |
+| `docs/htstep/HUONG_DAN_COLAB.md` | Mục "Chuẩn bị": tạo repo private (hoặc chuyển public → private), không chạy đoạn `upload_folder(".")` HF gợi ý, tạo token Write (hoặc Fine-grained), Colab Secrets, Drive / đĩa |
+| `tests/test_htstep_lora.py` `test_clip_repo_check` | Repo public / token Read / repo chưa có / repo tài khoản khác đều dừng; private + Write hoặc Fine-grained thì qua |
+
+Test local: **18 passed** (cùng môi trường như trên).

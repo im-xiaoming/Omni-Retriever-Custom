@@ -279,6 +279,29 @@ def test_precut_shard_flush(tmp_path):
     assert sh.flush() is None and sh.bytes == 0
 
 
+def test_clip_repo_check():
+    import precut_htstep as pc
+
+    class Api:
+        def __init__(self, private=True, role="write", exists=True):
+            self.private, self.role, self.exists = private, role, exists
+
+        def whoami(self):
+            return {"name": "me", "auth": {"accessToken": {"role": self.role}}}
+
+        def repo_info(self, repo, repo_type):
+            if not self.exists:
+                raise FileNotFoundError(repo)
+            return SimpleNamespace(private=self.private)
+
+    pc.check_clip_repo("me/clips", Api())
+    pc.check_clip_repo("me/clips", Api(role="fineGrained"))
+    for repo, api in (("me/clips", Api(private=False)), ("me/clips", Api(role="read")), ("me/clips", Api(exists=False)),
+                      ("nguyenminh04/clips", Api())):
+        with pytest.raises(SystemExit):
+            pc.check_clip_repo(repo, api)
+
+
 def test_precut_index_rows():
     import precut_htstep as pc
     items = {"a#0": {"video_id": "a", "split": "train"}, "a#1": {"video_id": "a", "split": "train"},

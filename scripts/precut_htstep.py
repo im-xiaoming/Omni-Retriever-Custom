@@ -15,14 +15,17 @@ docs/htstep/TAI_VIDEO.md section 5). The work unit is one video:
 Finished videos go into the open shard; at ``--shard-gb`` it is packed into ``shards/clips_NNNN.tar`` with
 ``shards/clips_NNNN.manifest.jsonl`` (one line per step of its videos: id, status, sha256, bytes, window, ...), the
 tar is uploaded to ``--hf-repo``, then the manifest, then ``state/done.jsonl`` / ``state/failed.jsonl``; the local
-copies are deleted after that. The uploaded manifests are the truth: a rerun (new Colab session) downloads them and
+copies are deleted after that. ``--hf-repo`` is the user's own private dataset repo (``check-repo``: it exists, is
+private, is in the account of HF_TOKEN, the token can write); it is the only repo written to, ``nguyenminh04/*`` is
+only read. The uploaded manifests are the truth: a rerun (new Colab session) downloads them and
 skips their videos, so a video is in exactly one shard; the shard open when a session dies is cut again. Shard names
 are never reused. ``fetch_error`` videos (network) go to ``state/failed.jsonl`` and are tried again by the next run.
 
-    python scripts/precut_htstep.py run --hf-repo <team>/htstep-omni-clips --processor <WAVE-7B dir> --work /content/precut
-    python scripts/precut_htstep.py verify --hf-repo <team>/htstep-omni-clips --out /content/precut/precut_index.jsonl
+    python scripts/precut_htstep.py run --hf-repo <user>/htstep-omni-clips --processor <WAVE-7B dir> --work /content/precut
+    python scripts/precut_htstep.py verify --hf-repo <user>/htstep-omni-clips --out /content/precut/precut_index.jsonl
     python scripts/precut_htstep.py check-transcode --n 5 --work /content/tc
-    python scripts/precut_htstep.py fetch --hf-repo <team>/htstep-omni-clips --out /content/htstep_clips   # GPU side
+    python scripts/precut_htstep.py fetch --hf-repo <user>/htstep-omni-clips --out /content/htstep_clips   # GPU side
+    python scripts/precut_htstep.py check-repo --hf-repo <user>/htstep-omni-clips   # exists, private, own account, Write token
 
 ``verify``: every item id has exactly one line (``ok`` with its sha256, or the reason it is out), no id in two shards,
 every manifest has its tar; prints the count per reason and writes ``precut_index.jsonl`` for ``convert_htstep.py
@@ -212,10 +215,33 @@ def hf_state(repo: str, name: str, out_dir: str) -> list:
         return []
 
 
-def cmd_run(a) -> None:
-    from huggingface_hub import HfApi
+def check_clip_repo(repo: str, api=None) -> None:
+    """The only repo this pipeline writes to: it must already exist (the user creates it), be a private dataset of the
+    token's own account and the token must be able to write. Anything else stops before a byte is written."""
+    if api is None:
+        from huggingface_hub import HfApi
+        api = HfApi()
+    me = api.whoami()
+    if repo.split("/")[0] != me["name"]:
+        sys.exit(f"CHECK clip_repo FAIL: {repo} is not in the account of HF_TOKEN ({me['name']})")
+    try:
+        info = api.repo_info(repo, repo_type="dataset")
+    except Exception as e:
+        sys.exit(f"CHECK clip_repo FAIL: dataset repo {repo} not found ({type(e).__name__}); create it first")
+    if not info.private:
+        sys.exit(f"CHECK clip_repo FAIL: {repo} is public; make it private (repo Settings -> Change visibility)")
+    role = me.get("auth", {}).get("accessToken", {}).get("role")
+    if role == "read":
+        sys.exit("CHECK clip_repo FAIL: HF_TOKEN is a Read token; make a Write token")
+    print(f"CHECK clip_repo OK {repo} (private, account {me['name']}, token {role})", flush=True)
 
-    HfApi().create_repo(a.hf_repo, repo_type="dataset", private=True, exist_ok=True)
+
+def cmd_check_repo(a) -> None:
+    check_clip_repo(a.hf_repo)
+
+
+def cmd_run(a) -> None:
+    check_clip_repo(a.hf_repo)
     meta = os.path.join(a.work, "hf")
     videos = read_items(a.items)
     with open(a.tar_index, newline="", encoding="utf-8") as f:
@@ -471,7 +497,7 @@ def main() -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
     items = [os.path.join(DATA, "items_train.jsonl"), os.path.join(DATA, "items_val.jsonl")]
     r = sub.add_parser("run")
-    r.add_argument("--hf-repo", required=True, help="team HF dataset repo (private) for the clip shards")
+    r.add_argument("--hf-repo", required=True, help="the user's private HF dataset repo for the clip shards")
     r.add_argument("--processor", required=True, help="WAVE-7B folder (its preprocessor_config.json)")
     r.add_argument("--work", required=True)
     r.add_argument("--jobs", type=int, default=0, help="0 = min(nproc, RAM GB / 2.5)")
@@ -491,12 +517,15 @@ def main() -> None:
     f.add_argument("--hf-repo", required=True)
     f.add_argument("--out", required=True)
     f.add_argument("--margin-gb", type=float, default=5)
+    k = sub.add_parser("check-repo")
+    k.add_argument("--hf-repo", required=True)
     for s in (r, v, t):
         s.add_argument("--items", nargs="+", default=items)
     for s in (r, t):
         s.add_argument("--tar-index", default=os.path.join(DATA, "tar_index.csv"))
     a = p.parse_args()
-    {"run": cmd_run, "verify": cmd_verify, "check-transcode": cmd_check_transcode, "fetch": cmd_fetch}[a.cmd](a)
+    {"run": cmd_run, "verify": cmd_verify, "check-transcode": cmd_check_transcode, "fetch": cmd_fetch,
+     "check-repo": cmd_check_repo}[a.cmd](a)
 
 
 if __name__ == "__main__":
