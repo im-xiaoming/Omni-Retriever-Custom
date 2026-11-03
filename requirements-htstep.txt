@@ -1,0 +1,19 @@
+# HT-Step LoRA (OMNI_HTSTEP_LORA_COLAB.md): notebooks/omni_htstep_precut.ipynb (CPU) and
+# notebooks/omni_htstep_train.ipynb (A100) both install exactly this file, on top of the torch / torchvision /
+# torchaudio of the Colab image (cell 1 prints them and the ffmpeg version).
+# decord / av / transformers are pinned: clips are cut and read with the same versions (docs/htstep/TAI_VIDEO.md 3.4).
+decord==0.6.0
+av==19.0.2
+transformers==4.51.3
+# same release window as transformers 4.51.3
+peft==0.15.2
+accelerate==1.6.0
+huggingface_hub>=0.30.0,<1.0
+safetensors>=0.4.5
+requests
+librosa>=0.10.2
+soundfile>=0.12.1
+einops>=0.8.0
+PyYAML>=6.0
+# imported by training/qwenvl/train/trainer.py; the HT-Step run itself launches without it (USE_DEEPSPEED=False)
+deepspeed>=0.15.0

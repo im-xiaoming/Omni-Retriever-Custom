@@ -5,7 +5,7 @@ convert_htstep.py
 HT-Step -> the Omni manifests, with the data rules of UniAV (docs/htstep/UNIAV_XU_LY_DU_LIEU.md section 12,
 plan OMNI_HTSTEP_LORA.md section 2). Two steps:
 
-``split`` (local, no GPU, no video read)
+``split`` (local or Colab CPU, no GPU, no video read)
     Picks videos and steps and writes, under ``--out-dir`` (default ``data/htstep``):
 
     * ``htstep_split_omni.json``  train / val videos with their mp4 source, excluded videos and why, the rules,
@@ -217,7 +217,8 @@ def cmd_split(a) -> None:
     print(f"CHECK tar_index {'OK' if not check.get('skipped') else 'SKIPPED'} {check}")
     val_files = json.load(open(a.val_files, encoding="utf-8")) if a.val_files else hf_val_files()
     sources = mp4_sources(a.tar_index, val_files)
-    yc2 = set(json.load(open(a.yc2, encoding="utf-8"))["database"])
+    yc2 = (set(json.load(open(a.yc2, encoding="utf-8"))["database"]) if os.path.isfile(a.yc2)
+           else set(a.yc2.split(",")))          # Colab: the YouCook2 ids that are HT-Step videos
     videos, items, excluded, counts = select(ann, tax, sources, yc2)
 
     split_doc = {
@@ -252,7 +253,7 @@ def cmd_split(a) -> None:
     print("htstep_split_omni.json sha256", sha256(os.path.join(out, "htstep_split_omni.json")))
 
 
-def build_record(it: dict, window: List[float], video_length: float) -> dict:
+def build_record(it: dict, window: List[float], video_length: float, src_transcoded: bool = False) -> dict:
     """The record of scripts/convert_youcookii.py::build_record plus the HT-Step fields and ``clip``."""
     return {
         "id": it["id"], "type": "retrieval",
@@ -263,6 +264,7 @@ def build_record(it: dict, window: List[float], video_length: float) -> dict:
         "partial": it["partial"], "segment": it["segment"], "window": [float(window[0]), float(window[1])],
         "video_length": float(video_length),
         "clip": f"clips/{it['video_id']}/{it['step_idx']}.npz",
+        "src_transcoded": bool(src_transcoded),
     }
 
 
@@ -279,14 +281,17 @@ def cmd_finalize(a) -> None:
             if status != "ok":
                 dropped[it["id"]] = status
                 continue
-            recs.append(build_record(it, p["window"], p["video_length"]))
+            recs.append(build_record(it, p["window"], p["video_length"], p.get("src_transcoded", False)))
         recs.sort(key=lambda r: (r["video_id"], r["step_idx"]))
         sha = write_jsonl(recs, os.path.join(a.out_dir, f"{s}_omni_htstep.jsonl"))
         stats[s] = {"status": dict(st), "clamped_end": sum(r["window"][1] < r["segment"][1] for r in recs),
                     **describe(recs, "window"), "sha256": sha}
         print(f"{s}_omni_htstep.jsonl: {len(recs)} records / {stats[s]['videos']} videos  sha256 {sha}")
+    kept = {i.split("#")[0] for i in pre if pre[i]["status"] == "ok"}
+    videos = {i.split("#")[0]: s for i, s in sorted(dropped.items()) if i.split("#")[0] not in kept}  # whole video out
     with open(os.path.join(a.out_dir, "dropped_steps.json"), "w", encoding="utf-8", newline="\n") as f:
-        json.dump({"steps": dict(sorted(dropped.items())), "stats": stats}, f, indent=1, ensure_ascii=False)
+        json.dump({"videos": videos, "videos_by_reason": dict(Counter(videos.values())),
+                   "steps": dict(sorted(dropped.items())), "stats": stats}, f, indent=1, ensure_ascii=False)
     print(json.dumps(stats, indent=1, ensure_ascii=False))
 
 
@@ -299,7 +304,8 @@ def main() -> None:
     s.add_argument("--tar-index-tars", default="D:/Học/KL/Data/Htstep/pseudocap/metadata/tar_index_tars.json")
     s.add_argument("--no-verify", action="store_true", help="skip the HF size check of the tar index")
     s.add_argument("--val-files", default="", help="json list of htstep-val-seen-videos files (default: ask HF)")
-    s.add_argument("--yc2", default="D:/Học/KL/Data/YouCookII/metadata/youcookii_annotations_uemr.json")
+    s.add_argument("--yc2", default="D:/Học/KL/Data/YouCookII/metadata/youcookii_annotations_uemr.json",
+                   help="youcookii annotations json, or comma-separated video ids")
     s.add_argument("--uniav-feat-index", default="D:/Học/KL/Data/Htstep/khao_sat/feat_tar_index.json")
     s.add_argument("--out-dir", default=os.path.join(REPO_ROOT, "data", "htstep"))
     f = sub.add_parser("finalize")

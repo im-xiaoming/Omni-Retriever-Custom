@@ -232,14 +232,93 @@ def test_process_clip_in_data_qwen(mp4, image_processor, tmp_path):
     assert grid.shape == (1, 3) and len(spg) == 1 and wav is not None
 
 
-def test_precut_units(tmp_path):
-    import precut_htstep as pc
+# ------------------------------------------------------------------------------------------------- precut
+def toy_items(tmp_path):
     ann, tax, src, yc2 = toy()
     _, items, _, _ = ch.select(ann, tax, src, yc2)
-    p = tmp_path / "items.jsonl"
-    ch.write_jsonl(items["train"] + items["val"], str(p))
-    units = pc.read_items([str(p)])
-    assert set(units) == {"1000", "part1"} and len(units["1000"]) == 48 and len(units["part1"]) == 2
+    paths = []
+    for s in ("train", "val"):
+        paths.append(str(tmp_path / f"items_{s}.jsonl"))
+        ch.write_jsonl(items[s], paths[-1])
+    return paths
+
+
+def test_precut_read_items_and_names(tmp_path):
+    import precut_htstep as pc
+    v = pc.read_items(toy_items(tmp_path))
+    assert set(v) == {"v_long", "v_val"} and len(v["v_long"]["items"]) == 48
+    assert v["v_val"]["split"] == "val" and v["v_val"]["source"]["file"] == "part1/v_val.mp4"
+    assert pc.next_shard(set()) == "clips_0000"
+    assert pc.next_shard({"clips_0000", "clips_0001", "clips_0003"}, 1) == "clips_0002"     # never reuse a name
+
+
+def test_precut_shard_flush(tmp_path):
+    import precut_htstep as pc
+    for vid in ("a", "b"):
+        os.makedirs(tmp_path / "clips" / vid)
+        (tmp_path / "clips" / vid / "0.npz").write_bytes(b"x" * 10)
+    calls = []
+
+    def upload(path, name):
+        assert os.path.exists(path)
+        if name.endswith(".manifest.jsonl"):                     # manifest only after its tar
+            assert calls and calls[-1][1] == name.replace(".manifest.jsonl", ".tar")
+            assert [json.loads(l)["id"] for l in open(path)] == ["a#0", "b#0", "c#0"]
+        calls.append((path, name))
+
+    sh = pc.Shard(str(tmp_path), {"clips_0000"}, upload)
+    ok = lambda v: {"id": f"{v}#0", "status": "ok", "clip": f"clips/{v}/0.npz", "sha256": "s", "bytes": 10}  # noqa
+    sh.add({"video_id": "a", "steps": [ok("a")]})
+    sh.add({"video_id": "b", "steps": [ok("b")]})
+    sh.add({"video_id": "c", "steps": [{"id": "c#0", "status": "empty_video_track"}]})
+    assert sh.bytes == 20
+    name, rows, vids = sh.flush()
+    assert name == "clips_0001" and [c[1] for c in calls] == ["shards/clips_0001.tar", "shards/clips_0001.manifest.jsonl"]
+    assert {r["shard"] for r in rows} == {"clips_0001"} and len(vids) == 3
+    assert not os.path.exists(tmp_path / "clips" / "a") and not os.listdir(tmp_path / "shards")   # local copies gone
+    assert sh.flush() is None and sh.bytes == 0
+
+
+def test_precut_index_rows():
+    import precut_htstep as pc
+    items = {"a#0": {"video_id": "a", "split": "train"}, "a#1": {"video_id": "a", "split": "train"},
+             "b#0": {"video_id": "b", "split": "val"}, "c#0": {"video_id": "c", "split": "train"}}
+    m = {"clips_0000": [{"id": "a#0", "status": "ok", "sha256": "s", "split": "train"},
+                        {"id": "a#1", "status": "past_end", "split": "train"}]}
+    rows, problems = pc.index_rows(items, m, failed={"b"})
+    assert [(r["id"], r["status"]) for r in rows] == [("a#0", "ok"), ("a#1", "past_end"), ("b#0", "fetch_error"),
+                                                       ("c#0", "missing")]
+    assert problems == ["c#0 not cut yet"]
+    m["clips_0001"] = [{"id": "a#0", "status": "ok", "sha256": "s"}, {"id": "z#0", "status": "ok"}]
+    _, problems = pc.index_rows(items, m, failed={"b", "c"})
+    assert any("two shards" in p for p in problems) and any("z#0" in p and "not an item" in p for p in problems)
+
+
+def test_cut_video_and_finalize(mp4, image_processor, tmp_path, monkeypatch):
+    import shutil
+    import precut_htstep as pc
+    monkeypatch.setattr(pc.io, "hf_get", lambda repo, path, out: shutil.copy(mp4, out))
+    monkeypatch.setattr(pc.io, "probe", lambda p: {"codec": "mpeg4", "frames": 30, "fps": "10/1", "duration": 3.0})
+    pc._IP = image_processor
+    it = lambda i, s: {"id": f"v#{i}", "video_id": "v", "step_idx": i, "global_step_index": 1,  # noqa: E731
+                       "partial": "Full Match", "segment": s, "text": "A: b"}
+    v = {"split": "val", "source": {"repo": "r", "file": "part1/v.mp4"},
+         "items": [it(0, [0.6, 2.4]), it(1, [2.0, 99.0]), it(2, [50.0, 60.0])]}
+    a = SimpleNamespace(work=str(tmp_path), frames=8, pixels=50176, audio_sec=8.0)
+    r = pc.cut_video("v", v, None, a)
+    assert r["status"] == "ok" and not r["transcoded"] and not os.path.exists(tmp_path / "tmp" / "v")
+    assert [s["status"] for s in r["steps"]] == ["ok", "ok", "past_end"]
+    s0, s1 = r["steps"][:2]
+    assert s0["sha256"] == pc.io.file_sha256(str(tmp_path / s0["clip"])) and s1["window"] == [2.0, pytest.approx(3.0)]
+    # finalize: only ok items, window / src_transcoded from the precut index
+    ch.write_jsonl(v["items"], str(tmp_path / "items_val.jsonl"))
+    ch.write_jsonl([], str(tmp_path / "items_train.jsonl"))
+    ch.write_jsonl(r["steps"], str(tmp_path / "precut_index.jsonl"))
+    ch.cmd_finalize(SimpleNamespace(precut_index=str(tmp_path / "precut_index.jsonl"), out_dir=str(tmp_path)))
+    recs = [json.loads(l) for l in open(tmp_path / "val_omni_htstep.jsonl", encoding="utf-8")]
+    assert [x["id"] for x in recs] == ["v#0", "v#1"] and recs[1]["timestamps"] == s1["window"]
+    assert recs[0]["clip"] == s0["clip"] and recs[0]["src_transcoded"] is False
+    assert json.load(open(tmp_path / "dropped_steps.json"))["steps"] == {"v#2": "past_end"}
 
 
 def test_convert_youcookii_untouched():
