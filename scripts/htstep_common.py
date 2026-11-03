@@ -1,4 +1,4 @@
-"""Shared setup of the HT-Step LoRA scripts (probe_htstep.py, export_step_emb.py, eval_htstep_val.py).
+"""Shared setup of the HT-Step LoRA scripts (probe_htstep.py, eval_htstep.py, export_step_emb.py).
 
 ``data_args`` mirrors the flags of training/train.sh (8 frames, 50176 pixels, 8 s audio, BEATs, all_layer), and
 ``load_model`` the model setup of training/qwenvl/train/train_qwen.py for a pretrained adapter with LORA_ONLY.

@@ -321,6 +321,50 @@ def test_cut_video_and_finalize(mp4, image_processor, tmp_path, monkeypatch):
     assert json.load(open(tmp_path / "dropped_steps.json"))["steps"] == {"v#2": "past_end"}
 
 
+# ------------------------------------------------------------------------------------------------- probe + eval callback
+def test_probe_plan():
+    import probe_htstep as pr
+    res = {1: {"status": "ok", "sec_per_step": 36.0, "max_reserved_gb": 30.0},
+           2: {"status": "ok", "sec_per_step": 30.0, "max_reserved_gb": 40.0},
+           4: {"status": "ok", "sec_per_step": 25.0, "max_reserved_gb": 75.0},     # >= 90 % of 80 GB
+           8: {"status": "OOM", "max_reserved_gb": 79.0}}
+    p = pr.plan(res, 80.0, 32 * 100, 1000, load_ms=10, val_ms=500)
+    assert p["grad_cache_chunk"] == 2 and p["optimizer_steps_per_epoch"] == 100
+    assert p["eval_every_frac"] == 0.5                  # val 0.142 h > 15 % of an epoch of 0.833 h
+    assert pr.plan(res, 80.0, 32 * 100, 100, load_ms=10, val_ms=500)["eval_every_frac"] == 0.25
+    assert pr.plan(res, 80.0, 32 * 100, 100, load_ms=5000, val_ms=500)["sec_per_step_with_loader"] == 40.0
+    assert pr.plan({8: res[8]}, 80.0, 3200, 100, 10, 500)["grad_cache_chunk"] is None
+
+
+def test_eval_callback_save_stop_resume(tmp_path, monkeypatch):
+    from qwenvl.train import retrieval_eval as rv
+    r1 = iter([10.0, 20.0, 15.0, 18.0, 30.0])
+    monkeypatch.setattr(rv, "encode", lambda model, ds: {"failed": []})
+    monkeypatch.setattr(rv, "score", lambda emb: {"t2v": {"R@1": next(r1), "R@1_multi": 0.0}, "v2t": {"R@1": 0.0}})
+    saved = []
+    monkeypatch.setattr(rv, "save_lora", lambda model, d: saved.append(d))
+    monkeypatch.setattr(rv, "save_embeddings", lambda emb, p: None)
+    ctl = lambda: SimpleNamespace(should_save=False, should_training_stop=False)  # noqa: E731
+    st = lambda s: SimpleNamespace(global_step=s, max_steps=100, epoch=s / 50)  # noqa: E731
+    cb = rv.RetrievalEvalCallback(None, None, str(tmp_path), every=10, patience=2)
+    cb.on_train_begin(None, st(0), ctl())                              # pt baseline: 10
+    c = ctl()
+    cb.on_step_end(None, st(10), c)                                    # 20: best
+    assert c.should_save and not c.should_training_stop and cb.st["best_step"] == 10 and len(saved) == 1
+    c = ctl()
+    cb.on_step_end(None, st(15), c)                                    # not an eval step
+    assert not c.should_save
+    cb2 = rv.RetrievalEvalCallback(None, None, str(tmp_path), every=10, patience=2)   # resumed session
+    c = ctl()
+    cb2.on_step_end(None, st(10), c)                                   # already evaluated: not again
+    assert not c.should_save and len(cb2.st["history"]) == 2
+    cb2.on_step_end(None, st(20), ctl())                               # 15
+    c = ctl()
+    cb2.on_step_end(None, st(30), c)                                   # 18: second eval without a better R@1
+    assert c.should_save and c.should_training_stop and cb2.st["best"] == 20.0
+    assert json.load(open(tmp_path / "metrics.json"))["best_step"] == 10
+
+
 def test_convert_youcookii_untouched():
     """convert_htstep.py does not refactor convert_youcookii.py, so the YC2 manifests are produced unchanged."""
     r = subprocess.run(["git", "-C", ROOT, "diff", "--quiet", "460257f", "--", "scripts/convert_youcookii.py", "scripts/eval_youcookii.py"])

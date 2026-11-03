@@ -201,6 +201,14 @@ class QwenVLTrainer(Trainer):
         run_dir = self._get_output_dir(trial=trial)
         output_dir = os.path.join(run_dir, checkpoint_folder)
         self.save_model(output_dir, _internal_call=True)
+        if getattr(self.args, "grad_cache_chunk", 0) > 0 and all(
+                "lora_" in n for n, p in self.model.named_parameters() if p.requires_grad):
+            # HT-Step LoRA (LORA_ONLY): the frozen heads are the pt adapter's, so the checkpoint keeps the LoRA tensors
+            # only; a resume loads them over the pt adapter (Trainer._load_from_checkpoint -> load_adapter).
+            from safetensors.torch import load_file, save_file
+            f = os.path.join(output_dir, "adapter_model.safetensors")
+            if os.path.isfile(f):
+                save_file({k: v for k, v in load_file(f).items() if "lora_" in k}, f, metadata={"format": "pt"})
 
         if self.args.save_strategy in [SaveStrategy.STEPS, SaveStrategy.EPOCH] and getattr(self.state, "best_global_step", None):
             best_checkpoint_folder = f"{PREFIX_CHECKPOINT_DIR}-{self.state.best_global_step}"

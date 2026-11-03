@@ -208,10 +208,10 @@ class RetrievalEvalCallback(TrainerCallback):
             if any(h["step"] == state.global_step for h in self.st["history"]):
                 return
             self._evaluate(state.global_step, state.epoch)
+            control.should_save = True               # a checkpoint after every eval (Colab sessions get cut)
             if self.st["bad_evals"] >= self.patience:
                 print(f"[eval] early stop: {self.patience} evals without a better t2v R@1", flush=True)
                 control.should_training_stop = True
-                control.should_save = True
 
     def _track(self, step: int, epoch: float):
         """Forgetting track (benchmark subset): logged, never used to pick anything."""
