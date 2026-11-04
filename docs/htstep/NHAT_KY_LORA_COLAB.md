@@ -197,3 +197,23 @@ Trạng thái theo bước:
 - **Log:** ô 4 có cảnh báo `[h264] mmco: unref short failure` (decord seek). Các video đó vẫn ra `ok` đủ clip.
 
 **Tiếp theo:** notebook train trên A100.
+
+## 2026-11-04 (2): rà notebook train với dữ liệu precut thật, thêm so sánh pt / best
+
+Nguồn: các file precut user tải từ Drive về `D:\Học\KL\Code\Omni\precut`. Gồm `meta/`, `verify.log`, `finalize.log` và 3 log ô 4.
+
+Không có gì phải sửa trong luồng train. Các điểm đã kiểm:
+
+| Điểm kiểm | Kết quả |
+| --- | --- |
+| Record của `train/val_omni_htstep.jsonl` | Có `clip: clips/<vid>/<idx>.npz` tương đối với `CLIP_ROOT` (ô 0 đặt `= /content/htstep_clips`). `fetch` giải nén shard vào đúng thư mục đó, nên `data_qwen.py:758` đọc được. Record không có khoá `audio`, nên audio lấy từ `wav` của clip (`:808`) |
+| `meta/` | `fetch` tải vào `<CLIPS>/meta`, trùng `META` ở ô 0. Đủ 6 file `make_protocol.HASHED` |
+| Shard trên HF | 3 phiên ô 4 lần lượt bắt đầu ở 0 / 11 / 21 shard, phiên cuối kết thúc ở `clips_0031` (32 manifest). Không còn tar mồ côi: tên shard dở luôn được dùng lại và ghi đè. Nên `fetch` (duyệt theo `.tar`) không gặp tar thiếu manifest |
+| Số bước | 43 261 / 32 = 1 352 bước một epoch, tối đa khoảng 2 704 bước cho 2 epoch. `--save_steps 200` hợp lý |
+
+Thêm `scripts/compare_htstep.py` và gọi ở ô 8. Script so best với pt trên `val_seen` bằng paired bootstrap theo query: 2 000 lần, seed 0, gallery giữ nguyên.
+
+- Chỉ số: R@1/5/10, MRR, theo hai chiều T→AV và AV→T.
+- Đầu vào là `val_embeds_{pt,best}.npz` (float16) do `eval_htstep.py` ghi. Vì là float16 nên số điểm có thể lệch `metrics_htstep_*.json` ở chữ số thập phân thứ hai.
+- Kết quả ghi vào `eval/compare_pt_best.json` và khoá `val_seen_best_minus_pt` của `summary.json`.
+- Test `test_compare_paired_bootstrap`. Local: **19 passed**.

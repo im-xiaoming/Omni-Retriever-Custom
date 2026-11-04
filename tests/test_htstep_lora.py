@@ -359,6 +359,24 @@ def test_probe_plan():
     assert pr.plan({8: res[8]}, 80.0, 3200, 100, 10, 500)["grad_cache_chunk"] is None
 
 
+def test_compare_paired_bootstrap():
+    import compare_htstep as cmp
+    rng = np.random.default_rng(1)
+    n, d = 200, 16
+    ids = np.array([f"v#{i}" for i in range(n)])
+    unit = lambda x: x / np.linalg.norm(x, axis=1, keepdims=True)  # noqa: E731  (the npz vectors are L2-normalised)
+    av = unit(rng.normal(size=(n, d)))
+    pt = {"ids": ids, "text": unit(av + rng.normal(scale=0.5, size=(n, d))), "av": av}     # noisy text: low R@1
+    best = {"ids": ids, "text": unit(av + rng.normal(scale=0.01, size=(n, d))), "av": av}  # near-perfect
+    same = cmp.compare(pt, pt, n=200)
+    assert same["t2v"]["R@1"]["diff"] == 0 and same["t2v"]["R@1"]["ci95"] == [0, 0]
+    assert not same["v2t"]["R@5"]["significant"]
+    up = cmp.compare(pt, best, n=200)
+    assert up["t2v"]["R@1"]["best"] == 100.0 and up["t2v"]["R@1"]["significant"] and up["t2v"]["R@1"]["ci95"][0] > 0
+    with pytest.raises(ValueError):
+        cmp.compare(pt, {**best, "ids": ids[::-1]})
+
+
 def test_eval_callback_save_stop_resume(tmp_path, monkeypatch):
     from qwenvl.train import retrieval_eval as rv
     r1 = iter([10.0, 20.0, 15.0, 18.0, 30.0])

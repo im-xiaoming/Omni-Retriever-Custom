@@ -97,7 +97,7 @@ Gửi lại cho agent: thư mục Drive `MyDrive/omniretriever/htstep_lora/precu
 | 5 | Mốc 0-shot của pt: `val_seen`, bench 12 hướng, `omni_step_emb_pt.npz` | Một lần; đã có kết quả thì tự bỏ qua |
 | 6 | Train. Ô này tự resume | Chạy lại mỗi phiên cho đến khi in `train xong` |
 | 7 | Chấm checkpoint `best` trên `val_seen` và bench, export `omni_step_emb_best.npz` | Sau khi train xong |
-| 8 | Bảng pt / best, `summary.json` | Cuối cùng |
+| 8 | Bảng pt / best; best − pt trên `val_seen` với khoảng tin cậy 95 % (paired bootstrap, `scripts/compare_htstep.py`, dấu `*` = khác biệt có ý nghĩa); `summary.json` | Cuối cùng |
 
 Ghi chú về ô 4:
 
@@ -115,7 +115,7 @@ Kết quả nằm ở `MyDrive/omniretriever/htstep_lora/<RUN>/`:
 
 - `ckpt/` gồm `checkpoint-N` (last), `best/` (chỉ LoRA), `metrics.json`, `eval_state.json`, `vram.json`;
 - `chunk.json`, `vram_probe.json`, `protocol.json`;
-- `eval/metrics_htstep_{pt,best}.json`, `eval/bench/bench_{pt,best}.json`;
+- `eval/metrics_htstep_{pt,best}.json`, `eval/compare_pt_best.json`, `eval/bench/bench_{pt,best}.json`;
 - `omni_step_emb_{pt,best}.npz`, `summary.json`.
 
 Gửi lại cho agent: `summary.json`, `chunk.json`, `vram_probe.json`, `ckpt/metrics.json`, và các file `*.log` nếu có lỗi.
