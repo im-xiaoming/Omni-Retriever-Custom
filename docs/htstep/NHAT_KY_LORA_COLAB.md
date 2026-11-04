@@ -167,3 +167,33 @@ User đã tạo `GraceFeel/htstep-omni-clips`. Kiểm qua API công khai lúc 20
 | `tests/test_htstep_lora.py` `test_clip_repo_check` | Repo public / token Read / repo chưa có / repo tài khoản khác đều dừng; private + Write hoặc Fine-grained thì qua |
 
 Test local: **18 passed** (cùng môi trường như trên).
+
+## 2026-11-04: precut xong (notebook precut ô 0–5)
+
+Nguồn: output lưu trong `notebooks/omni_htstep_precut.ipynb` (bản user tải về từ Colab; không commit).
+
+**Máy:** runtime CPU, 2 nproc, RAM 12.7 GB, nên chạy 2 worker. Phiên cuối của ô 4 cắt 2 661 video (16 379 bước) trong 398 phút, `failed_to_retry: 0`. Tổng cộng có 32 shard.
+
+| Ô | Kết quả |
+| --- | --- |
+| 1 | `CHECK clip_repo OK GraceFeel/htstep-omni-clips (private, account GraceFeel, token fineGrained)` |
+| 2 | `CHECK items_unchanged OK`. train 44 151 bước / 7 110 video, val 2 990 / 510. `htstep_split_omni.json` sha256 `4829468e…` |
+| 3 | `CHECK transcode_pixels OK (5 videos)`: `rgb_max_abs_diff 0`, `yuv_equal` trên cả 5 video, nên rủi ro "ffmpeg bilinear ≠ decord" không xảy ra |
+| 5 | `CHECK precut_integrity OK`: 47 141 item, `n_problems 0`, clip 43.95 GB, 372 video AV1 chuyển mã đạt |
+
+Trạng thái theo bước:
+
+| Split | ok | empty_video_track | transcode_mismatch | past_end |
+| --- | ---: | ---: | ---: | ---: |
+| train | 43 261 (98.0 %) | 775 (100 video) | 89 (13 video) | 26 (4 video) |
+| val | 2 990 (100 %) | 0 | 0 | 0 |
+
+- **Manifest:** `train_omni_htstep.jsonl` 43 261 record / 6 993 video, sha256 `0a7a2613…`. `val_omni_htstep.jsonl` 2 990 / 510, sha256 `adc2b9a1…`. Cả hai đã upload lên `meta/` của repo clip.
+- **So với `TAI_VIDEO.md`:**
+  - Có 46 251 bước ok. Ước lượng cũ là 43 676 bước đọc được, vì khi đó chưa tính phần AV1 cứu được nhờ chuyển mã.
+  - Video track rỗng: 100, so với 98 đã kiểm kê.
+  - Clip trung bình 0.95 MB/bước, so với 0.944 đã đo.
+- **`transcode_mismatch`** (13 video): ví dụ `lgfwE8xpO_s` có avg fps `1355625/45227` (VFR). Sau khi chuyển mã, số khung, fps hoặc độ dài không khớp, nên bị loại theo đúng luật. Mất 0.2 % số bước train, không cứu.
+- **Log:** ô 4 có cảnh báo `[h264] mmco: unref short failure` (decord seek). Các video đó vẫn ra `ok` đủ clip.
+
+**Tiếp theo:** notebook train trên A100.
