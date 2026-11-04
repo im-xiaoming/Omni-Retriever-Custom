@@ -217,3 +217,28 @@ Thêm `scripts/compare_htstep.py` và gọi ở ô 8. Script so best với pt tr
 - Đầu vào là `val_embeds_{pt,best}.npz` (float16) do `eval_htstep.py` ghi. Vì là float16 nên số điểm có thể lệch `metrics_htstep_*.json` ở chữ số thập phân thứ hai.
 - Kết quả ghi vào `eval/compare_pt_best.json` và khoá `val_seen_best_minus_pt` của `summary.json`.
 - Test `test_compare_paired_bootstrap`. Local: **19 passed**.
+
+## 2026-11-04 (3): ô 4 trên A100 40 GB, chọn cấu hình nhanh nhất
+
+Nguồn: log ô 4 user dán vào `D:\Học\KL\log.md`. Môi trường: GPU `NVIDIA A100-SXM4-40GB` (39.49 GB), torch 2.11.0+cu130, sdpa, commit `0ed93a6`. `CHECK lora_only OK {'LoRA': 6881280}`. Sau khi load chiếm 18.35 GB. Eval batch 1: 18.67 GB, 315.6 ms/item.
+
+| K (checkpointing bật) | reserved GB | s/bước |
+| --- | ---: | ---: |
+| 1 | 19.16 | 38.94 |
+| 2 | 19.71 | **25.51** |
+| 4 | 21.25 | 25.71 |
+| 8 | 28.62 | 31.60 |
+
+- Luật cũ chọn K lớn nhất vừa 90 % VRAM, nên ra K = 8: 11.87 giờ/epoch, cả lượt khoảng 27.3 giờ.
+- Nhưng K = 8 **chậm hơn** K = 2 / 4 khoảng 24 %. Có thể do attention của ViT với sdpa tốn theo bình phương độ dài chuỗi patch gộp của K video; mình chưa kiểm.
+- VRAM còn dư khoảng 18 GB, nên có thể tắt gradient checkpointing để bỏ một lượt forward tính lại trong backward.
+
+Sửa:
+
+- `probe_htstep.py` đo K = 1, 2, 4, 8 × checkpointing bật / tắt, chọn cấu hình **nhanh nhất** vừa 90 % VRAM, ghi thêm `gradient_checkpointing` vào `chunk.json`.
+- `make_protocol.py write --gradient-checkpointing`.
+- Notebook ô 4 đo lại nếu `chunk.json` là bản cũ và chưa có checkpoint; ô 6 lấy `GRADIENT_CHECKPOINTING` từ `chunk.json`.
+- Spec mục 2 ghi "gradient checkpointing bật". Đổi sang tắt chỉ ảnh hưởng tốc độ / VRAM, không đổi phép tính (user yêu cầu chạy hết công suất trên A100 40 GB).
+- Test `test_probe_plan` cập nhật. Local: **19 passed**.
+
+Ước lượng với K = 2 khi checkpointing bật: 25.51 × 1 352 / 3 600 = 9.6 giờ/epoch, tức khoảng 22.8 giờ cả lượt. Tắt checkpointing có thể nhanh hơn nữa; ô 4 sẽ đo.

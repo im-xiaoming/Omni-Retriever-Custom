@@ -347,16 +347,19 @@ def test_cut_video_and_finalize(mp4, image_processor, tmp_path, monkeypatch):
 # ------------------------------------------------------------------------------------------------- probe + eval callback
 def test_probe_plan():
     import probe_htstep as pr
-    res = {1: {"status": "ok", "sec_per_step": 36.0, "max_reserved_gb": 30.0},
-           2: {"status": "ok", "sec_per_step": 30.0, "max_reserved_gb": 40.0},
-           4: {"status": "ok", "sec_per_step": 25.0, "max_reserved_gb": 75.0},     # >= 90 % of 80 GB
-           8: {"status": "OOM", "max_reserved_gb": 79.0}}
+    row = lambda k, gc, st, s, mem: {"k": k, "gc": gc, "status": st, "sec_per_step": s, "max_reserved_gb": mem}  # noqa
+    res = {"K1": row(1, True, "ok", 36.0, 30.0), "K2": row(2, True, "ok", 30.0, 40.0),
+           "K4": row(4, True, "ok", 25.0, 75.0),        # fastest but >= 90 % of 80 GB
+           "K8": row(8, True, "OOM", None, 79.0), "K1_nogc": row(1, False, "ok", 31.0, 50.0)}
     p = pr.plan(res, 80.0, 32 * 100, 1000, load_ms=10, val_ms=500)
-    assert p["grad_cache_chunk"] == 2 and p["optimizer_steps_per_epoch"] == 100
+    assert (p["grad_cache_chunk"], p["gradient_checkpointing"]) == (2, True) and p["optimizer_steps_per_epoch"] == 100
     assert p["eval_every_frac"] == 0.5                  # val 0.142 h > 15 % of an epoch of 0.833 h
     assert pr.plan(res, 80.0, 32 * 100, 100, load_ms=10, val_ms=500)["eval_every_frac"] == 0.25
     assert pr.plan(res, 80.0, 32 * 100, 100, load_ms=5000, val_ms=500)["sec_per_step_with_loader"] == 40.0
-    assert pr.plan({8: res[8]}, 80.0, 3200, 100, 10, 500)["grad_cache_chunk"] is None
+    fast = {**res, "K2_nogc": row(2, False, "ok", 20.0, 60.0)}
+    p = pr.plan(fast, 80.0, 3200, 100, 10, 500)
+    assert (p["grad_cache_chunk"], p["gradient_checkpointing"]) == (2, False)   # fastest that fits, not the largest K
+    assert pr.plan({"K8": res["K8"]}, 80.0, 3200, 100, 10, 500)["grad_cache_chunk"] is None
 
 
 def test_compare_paired_bootstrap():

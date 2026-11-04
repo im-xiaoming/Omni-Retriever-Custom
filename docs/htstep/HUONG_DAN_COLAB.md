@@ -101,7 +101,8 @@ Gửi lại cho agent: thư mục Drive `MyDrive/omniretriever/htstep_lora/precu
 
 Ghi chú về ô 4:
 
-- Chọn K lớn nhất có `max_memory_reserved` dưới 90 % VRAM.
+- Đo K = 1, 2, 4, 8 với gradient checkpointing bật rồi tắt. Chọn cấu hình **nhanh nhất** (giây/bước) có `max_memory_reserved` dưới 90 % VRAM. Cả hai lựa chọn đều không đổi loss hay gradient, chỉ đổi tốc độ và VRAM.
+- `chunk.json` của bản cũ (chọn K lớn nhất, không có khoá `gradient_checkpointing`) sẽ được tự đo lại nếu chưa có checkpoint train. Bản cũ được đổi tên thành `*.json.old`.
 - Đặt eval mỗi 1/2 epoch nếu một lượt val tốn hơn 15 % thời gian một epoch; không thì mỗi 1/4 epoch.
 - In VRAM sau khi load, VRAM theo từng K, VRAM khi eval, thời gian một epoch và số phiên Colab cần.
 

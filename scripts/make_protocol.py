@@ -8,7 +8,8 @@ Written once by the train notebook (cell 4, default ``configs/omni_htstep_lora_p
 in the run folder on Drive); every training session
 checks it first (``check``).
 
-    python scripts/make_protocol.py write --grad-cache-chunk 4 --eval-every-frac 0.25 --data-dir <clips>/meta --out <p>
+    python scripts/make_protocol.py write --grad-cache-chunk 4 --gradient-checkpointing False --eval-every-frac 0.25 \\
+        --data-dir <clips>/meta --out <p>
     python scripts/make_protocol.py check --data-dir <clips>/meta --protocol <p>          # before every train session
 """
 import argparse
@@ -73,6 +74,7 @@ def hf_sha(repo, path):
 def write(a):
     doc = {
         "values": VALUES, "eval_every_frac": a.eval_every_frac, "grad_cache_chunk": a.grad_cache_chunk,
+        "gradient_checkpointing": a.gradient_checkpointing == "True",
         "files": {n: sha256(os.path.join(a.data_dir, n)) for n in HASHED},
         "model": {"repo": "nguyenminh04/omni-model", "beats": "BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt",
                   "beats_sha256": hf_sha("nguyenminh04/omni-model", "BEATs_iter3_plus_AS2M_finetuned_on_AS2M_cpt2.pt")},
@@ -106,6 +108,7 @@ if __name__ == "__main__":
     w = sub.add_parser("write")
     w.add_argument("--eval-every-frac", type=float, required=True)
     w.add_argument("--grad-cache-chunk", type=int, required=True)
+    w.add_argument("--gradient-checkpointing", choices=("True", "False"), default="True")  # speed only, chunk.json
     w.add_argument("--data-dir", default=DATA)
     w.add_argument("--out", default=OUT)
     c = sub.add_parser("check")

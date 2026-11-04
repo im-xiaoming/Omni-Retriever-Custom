@@ -6,13 +6,14 @@ VRAM / speed probe of the HT-Step LoRA run and the choice of the GradCache chunk
 cell 4), on the training GPU, with the pre-cut clips:
 
 1. memory once WAVE-7B + BEATs + the pt adapter (LORA_ONLY) sit on the GPU;
-2. for K = 1, 2, 4, 8: 3 optimiser steps on a batch of 32 with GradCache chunks of K (gradient checkpointing on, bf16,
-   same-text mask), ``max_memory_allocated`` / ``max_memory_reserved`` and seconds per step (step 1 = warm-up, not
-   timed); OOM is recorded and the next K runs;
+2. for K = 1, 2, 4, 8, with gradient checkpointing on and then off: 3 optimiser steps on a batch of 32 with GradCache
+   chunks of K (bf16, same-text mask), ``max_memory_allocated`` / ``max_memory_reserved`` and seconds per step (step 1
+   = warm-up, not timed); OOM is recorded and the larger K of that mode are skipped;
 3. inference at batch 1 on 50 val items (AV + text, what validation runs): peak memory and ms per item;
-4. K = the largest one with ``max_memory_reserved`` < 90 % of the GPU memory; time of one epoch with it, of one val
-   pass, the eval rule of the protocol (every 1/2 epoch if one val pass > 15 % of an epoch, else every 1/4), the time
-   of the whole run and the number of Colab sessions;
+4. (K, checkpointing) = the fastest one with ``max_memory_reserved`` < 90 % of the GPU memory (the loss and its
+   gradient do not depend on either, test_grad_cache_matches_full_batch; on an A100 40 GB with sdpa, K = 8 was slower
+   than K = 2 / 4); time of one epoch with it, of one val pass, the eval rule of the protocol (every 1/2 epoch if one
+   val pass > 15 % of an epoch, else every 1/4), the time of the whole run and the number of Colab sessions;
 5. ``<out>/chunk.json`` (read by the train cell) and ``<out>/vram_probe.json``.
 
     python scripts/probe_htstep.py --train-manifest <clips>/meta/train_omni_htstep.jsonl \\
@@ -50,12 +51,15 @@ def dataset_of(manifest, processor, n):
     return ds
 
 
-def train_chunk(model, items, k, steps, temperature):
+def train_chunk(model, items, k, steps, temperature, gc=True):
     from qwenvl.data.data_qwen import DataCollatorForOmniDataset
     from qwenvl.train.grad_cache import grad_cache_step
     from qwenvl.train.retrieval_eval import _to_device
 
-    model.get_base_model().gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    if gc:
+        model.get_base_model().gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    else:
+        model.get_base_model().gradient_checkpointing_disable()
     model.train()
     params = [p for p in model.parameters() if p.requires_grad]
     opt = torch.optim.AdamW(params, lr=1e-4, betas=(0.9, 0.95), weight_decay=0.01)
@@ -81,7 +85,8 @@ def train_chunk(model, items, k, steps, temperature):
         res = {"status": "ok", "sec_per_step": round(float(np.mean(times)), 2)}
     except torch.cuda.OutOfMemoryError:
         res = {"status": "OOM"}
-    res.update(max_allocated_gb=gb(torch.cuda.max_memory_allocated()), max_reserved_gb=gb(torch.cuda.max_memory_reserved()))
+    res.update(k=k, gc=gc, max_allocated_gb=gb(torch.cuda.max_memory_allocated()),
+               max_reserved_gb=gb(torch.cuda.max_memory_reserved()))
     del opt
     model.zero_grad(set_to_none=True)
     torch.cuda.empty_cache()
@@ -114,24 +119,26 @@ def inference(model, items):
 
 def plan(results: dict, total_gb: float, n_train: int, n_val: int, load_ms: float, val_ms: float,
          epochs: int = 2, session_h: float = 12.0, workers: int = 4) -> dict:
-    """K, eval fraction and time estimates from the probe table. ``load_ms``: loader time per item (CPU); training
-    loads with ``workers`` processes (train.sh --dataloader_num_workers 4), validation in the main process."""
-    fit = [k for k, r in results.items() if r["status"] == "ok" and r["max_reserved_gb"] < 0.9 * total_gb]
+    """(K, checkpointing), eval fraction and time estimates from the probe table (label -> row with ``k``, ``gc``).
+    ``load_ms``: loader time per item (CPU); training loads with ``workers`` processes (train.sh
+    --dataloader_num_workers 4), validation in the main process."""
+    fit = [r for r in results.values() if r["status"] == "ok" and r["max_reserved_gb"] < 0.9 * total_gb]
     if not fit:
         return {"grad_cache_chunk": None, "why": "no K fits in 90 % of the GPU memory"}
-    k = max(fit)
+    best = min(fit, key=lambda r: r["sec_per_step"])
     steps_epoch = math.ceil(n_train / BATCH)
-    sec_step = max(results[k]["sec_per_step"], load_ms * BATCH / workers / 1000)
+    sec_step = max(best["sec_per_step"], load_ms * BATCH / workers / 1000)
     epoch_h = sec_step * steps_epoch / 3600
     val_h = n_val * (val_ms + load_ms) / 1000 / 3600
     frac = 0.5 if val_h > 0.15 * epoch_h else 0.25
     total_h = epochs * epoch_h + (epochs / frac + 1) * val_h          # + the pt baseline pass
-    return {"grad_cache_chunk": k, "eval_every_frac": frac, "optimizer_steps_per_epoch": steps_epoch,
+    return {"grad_cache_chunk": best["k"], "gradient_checkpointing": best["gc"], "eval_every_frac": frac,
+            "optimizer_steps_per_epoch": steps_epoch,
             "sec_per_step_with_loader": round(sec_step, 2), "epoch_hours": round(epoch_h, 2), "val_pass_hours": round(val_h, 2),
             "val_pass_share_of_epoch": round(val_h / epoch_h, 3), "run_hours_max": round(total_h, 1),
             "colab_sessions": math.ceil(total_h / session_h), "session_hours_assumed": session_h,
-            "rule": "K = largest with max_memory_reserved < 90 % of the GPU; eval every 1/2 epoch if one val pass "
-                    "> 15 % of an epoch, else every 1/4"}
+            "rule": "(K, gradient checkpointing) = fastest with max_memory_reserved < 90 % of the GPU; eval every 1/2 "
+                    "epoch if one val pass > 15 % of an epoch, else every 1/4"}
 
 
 def main():
@@ -173,10 +180,13 @@ def main():
     if len(items) < len(ds):
         sys.exit(f"CHECK clips FAIL: {len(ds) - len(items)} of {len(ds)} train items did not load (CLIP_ROOT {a.clip_root})")
     results = {}
-    for k in CHUNKS:
-        r = results[k] = train_chunk(model, items, k, a.steps, 0.01)
-        print(f"K={k}: {r['status']:4s} alloc {r['max_allocated_gb']:6.2f} GB  reserved {r['max_reserved_gb']:6.2f} GB"
-              f"  {r.get('sec_per_step', float('nan')):7.2f} s/step", flush=True)
+    for gc in (True, False):
+        for k in CHUNKS:
+            r = results[f"K{k}{'' if gc else '_nogc'}"] = train_chunk(model, items, k, a.steps, 0.01, gc)
+            print(f"K={k} checkpointing {'on ' if gc else 'off'}: {r['status']:4s} alloc {r['max_allocated_gb']:6.2f} GB  "
+                  f"reserved {r['max_reserved_gb']:6.2f} GB  {r.get('sec_per_step', float('nan')):7.2f} s/step", flush=True)
+            if r["status"] == "OOM":
+                break                                   # a larger K of this mode needs more memory
     vds = dataset_of(a.val_manifest, processor, 50)
     inf = inference(model, [x for x in (vds._get_item(i) for i in range(len(vds))) if x is not None])
     n_train = sum(1 for _ in open(a.train_manifest, encoding="utf-8"))
@@ -188,18 +198,19 @@ def main():
         json.dump(rec, f, indent=1)
     print(f"\nVRAM (GB, GPU {total:.1f}): after load {after_load['allocated_gb']} | eval batch 1 {inf['max_allocated_gb']} "
           f"(reserved {inf['max_reserved_gb']}), {inf['ms_per_item']} ms/item")
-    print("K  status  alloc GB  reserved GB  s/step")
-    for k, r in results.items():
-        print(f"{k:<2} {r['status']:6s}  {r['max_allocated_gb']:8.2f}  {r['max_reserved_gb']:11.2f}  "
+    print("run      status  alloc GB  reserved GB  s/step")
+    for label, r in results.items():
+        print(f"{label:<8} {r['status']:6s}  {r['max_allocated_gb']:8.2f}  {r['max_reserved_gb']:11.2f}  "
               f"{r.get('sec_per_step', float('nan')):6.2f}")
     print(json.dumps(choice, indent=1), flush=True)
     if choice["grad_cache_chunk"] is None:
         sys.exit("CHECK chunk FAIL: " + choice["why"])
     with open(os.path.join(a.out, "chunk.json"), "w", encoding="utf-8") as f:
-        json.dump({k: rec[k] for k in ("grad_cache_chunk", "eval_every_frac", "epoch_hours", "val_pass_hours",
-                                       "run_hours_max", "colab_sessions")} | {"gpu": props.name}, f, indent=1)
-    print(f"CHECK chunk OK K={choice['grad_cache_chunk']} eval every {choice['eval_every_frac']} epoch -> "
-          f"{os.path.join(a.out, 'chunk.json')}")
+        json.dump({k: rec[k] for k in ("grad_cache_chunk", "gradient_checkpointing", "eval_every_frac", "epoch_hours",
+                                       "val_pass_hours", "run_hours_max", "colab_sessions")} | {"gpu": props.name},
+                  f, indent=1)
+    print(f"CHECK chunk OK K={choice['grad_cache_chunk']} gradient checkpointing {choice['gradient_checkpointing']} "
+          f"eval every {choice['eval_every_frac']} epoch -> {os.path.join(a.out, 'chunk.json')}")
 
 
 if __name__ == "__main__":
