@@ -187,6 +187,25 @@ class QwenVLTrainer(Trainer):
             except TypeError:
                 return super()._get_train_sampler()
 
+    def _load_from_checkpoint(self, resume_from_checkpoint, model=None):
+        # A LoRA-only checkpoint (see _save_checkpoint) has no classify_linear / beats_ln / beats_proj, and peft's
+        # load_adapter raises KeyError on missing modules_to_save. The heads loaded from the pt adapter are frozen, so
+        # keep them and overlay the checkpoint's LoRA tensors.
+        f = os.path.join(resume_from_checkpoint, "adapter_model.safetensors")
+        if _is_peft_model(self.model) and os.path.isfile(f):
+            from peft import get_peft_model_state_dict, set_peft_model_state_dict
+            from safetensors.torch import load_file
+            sd, ck = get_peft_model_state_dict(self.model), load_file(f)
+            if set(ck) < set(sd):
+                assert all("lora_" in k for k in ck), "partial checkpoint with non-LoRA tensors"
+                sd.update(ck)
+                res = set_peft_model_state_dict(self.model, sd)
+                bad = [k for k in res.missing_keys if "lora_" in k] + list(res.unexpected_keys)
+                assert not bad, f"LoRA keys not loaded from {f}: {bad[:5]}"
+                print(f"Loaded {len(ck)} LoRA tensors from {f} (heads kept from the pt adapter)")
+                return
+        super()._load_from_checkpoint(resume_from_checkpoint, model)
+
     def _save_checkpoint(self, model, trial):
         # In all cases, including ddp/dp/deepspeed, self.model is always a reference to the model we
         # want to save except FullyShardedDDP.
