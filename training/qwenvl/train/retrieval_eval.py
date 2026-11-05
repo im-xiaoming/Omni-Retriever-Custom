@@ -58,8 +58,9 @@ def _to_device(batch: dict, device, dtype) -> dict:
 
 
 @torch.no_grad()
-def encode(model, dataset, max_items: int = 0) -> dict:
-    """{'text', 'av': (N, D) float32 L2-normalised, 'ids', 'texts', 'failed': [ids]} at batch 1."""
+def encode(model, dataset, max_items: int = 0, log_every: int = 250) -> dict:
+    """{'text', 'av': (N, D) float32 L2-normalised, 'ids', 'texts', 'failed': [ids]} at batch 1; a progress line
+    every ``log_every`` items (a val pass takes ~0.5 h)."""
     from qwenvl.data.data_qwen import DataCollatorForOmniDataset
 
     collate = DataCollatorForOmniDataset()
@@ -68,8 +69,12 @@ def encode(model, dataset, max_items: int = 0) -> dict:
     p = next(model.parameters())
     txt, av, ids, texts, failed = [], [], [], [], []
     n = len(dataset) if not max_items else min(max_items, len(dataset))
+    t0 = time.time()
     try:
         for i in range(n):
+            if i and log_every and i % log_every == 0:
+                el = time.time() - t0
+                print(f"[encode] {i}/{n} | {el / 60:.1f} min, ETA {el / i * (n - i) / 60:.1f} min", flush=True)
             rec = dataset.list_data_dict[i]
             item = dataset._get_item(i)
             if item is None:
