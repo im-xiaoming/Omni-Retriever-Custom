@@ -263,3 +263,19 @@ Nguồn: log ô 4 trong `D:\Học\KL\log.md`. Bản cũ được đổi tên th�
   - K2 tắt (22.9) và K4 tắt (24.0) gần như ngang nhau. Chọn K2 thì an toàn VRAM hơn.
 
 Không cần sửa code. Tiếp theo: ô 5 (mốc pt), rồi ô 6 (train).
+
+## 2026-11-05 (2): ô 5, mốc pt, và lỗi bench
+
+**`val_seen` pt:** N = 2 990, failed 0, 1 532 s. VRAM đỉnh 18.64 GB.
+
+| Chiều | R@1 | R@5 | R@10 | NDCG@10 | MRR | R@1 multi |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| t2v (T→AV) | 7.16 | 22.04 | 32.71 | 18.05 | 15.21 | 28.59 |
+| v2t (AV→T) | 21.97 | 31.81 | 40.80 | 29.57 | 27.68 | 21.97 |
+
+**Lỗi bench pt:** `omniretriever.cli extract` dừng với lỗi `FileNotFoundError: BEATs ... not found at BEATs_iter3_...pt`.
+
+- Nguyên nhân: `load_wave_backbone` (`src/omniretriever/models/wave.py:47`) chỉ tìm BEATs trong `$WAVE_HOME`. Notebook train đặt `BEATS_PATH` nhưng không đặt biến môi trường `WAVE_HOME`.
+- Sửa: `eval_bench.py` đặt `WAVE_HOME = dirname(BEATS_PATH)` cho tiến trình con, nếu chưa có. Cách này giống `retrieval_demo.py:128`.
+- Ảnh hưởng: ô 7 (bench best) cũng gọi script này, nên lỗi tương tự được sửa luôn.
+- Chạy lại: kéo code mới (ô 1) rồi chạy ô 5. `val_seen` và `export_step_emb` đã có kết quả nên tự bỏ qua; chỉ bench chạy lại.

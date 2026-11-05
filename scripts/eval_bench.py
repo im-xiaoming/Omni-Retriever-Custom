@@ -64,6 +64,9 @@ def main():
     n = sum(1 for l in open(a.manifest, encoding="utf-8") if l.strip())
     emb, met = os.path.join(a.out, f"embeddings_{a.tag}.npz"), os.path.join(a.out, f"metrics_{a.tag}.json")
     envp = dict(os.environ, PYTHONPATH=os.path.join(REPO_ROOT, "src") + os.pathsep + env("PYTHONPATH", ""))
+    # omniretriever's loader finds BEATs only under WAVE_HOME; the train notebook sets BEATS_PATH (= WAVE_HOME/<pt>)
+    envp.setdefault("WAVE_HOME", os.path.dirname(env("BEATS_PATH")) if env("BEATS_PATH") else
+                    os.path.dirname(a.base_model))
     subprocess.run([sys.executable, "-m", "omniretriever.cli", "extract", a.manifest, "--media-root", a.media_root,
                     "--base-model", a.base_model, "--adapter", adapter, "--output", emb, "--device", "cuda",
                     "--dtype", "bfloat16"], check=True, env=envp)
