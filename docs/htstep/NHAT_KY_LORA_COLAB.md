@@ -279,3 +279,28 @@ Không cần sửa code. Tiếp theo: ô 5 (mốc pt), rồi ô 6 (train).
 - Sửa: `eval_bench.py` đặt `WAVE_HOME = dirname(BEATS_PATH)` cho tiến trình con, nếu chưa có. Cách này giống `retrieval_demo.py:128`.
 - Ảnh hưởng: ô 7 (bench best) cũng gọi script này, nên lỗi tương tự được sửa luôn.
 - Chạy lại: kéo code mới (ô 1) rồi chạy ô 5. `val_seen` và `export_step_emb` đã có kết quả nên tự bỏ qua; chỉ bench chạy lại.
+
+## 2026-11-05 (3): ô 6 treo ở forgetting track, bỏ track
+
+**Hiện tượng:**
+
+- Eval pt ở bước 0 chạy xong: `t2v R@1 7.16`, `v2t R@1 21.97`, 1 365 s, khớp ô 5.
+- Sau đó hơn 1 giờ log không in thêm dòng nào: không có `[encode]`, `[track]` hay `[Step 1/2704]`.
+
+**Nguyên nhân:**
+
+- Ngay sau eval bước 0, callback chấm forgetting track (`track_bench1000.jsonl`, video bench đầy đủ cùng `.wav`). Việc đọc dùng loader của training, tức decord.
+- decord **treo vĩnh viễn** khi tạo `VideoReader` trên 561/3515 clip bench (`src/omniretriever/data/media.py:77-85`). Chỗ treo nằm trong C nên không timeout nào cắt được.
+- Bench ở ô 5 / 7 không bị vì đi qua `omniretriever.cli`, dùng PyAV.
+
+**Sửa:**
+
+- Ô 6 bỏ `--track_manifest`.
+- Track chỉ để theo dõi (không dùng để chọn gì). Mức quên vẫn đo được bằng bench 12 hướng cho pt (ô 5) và best (ô 7).
+- Khác với spec 4.5: không còn đường cong quên theo từng epoch.
+
+**Chạy lại:**
+
+- Dừng ô 6. Nếu nút Stop không có tác dụng (tiến trình đang kẹt trong C), mở Terminal và chạy `pkill -9 -f train_qwen.py`.
+- Kéo code mới (ô 1), rồi chạy ô 6.
+- `eval_state.json` đã có kết quả bước 0, nên eval pt không chạy lại; train vào thẳng bước 1.
