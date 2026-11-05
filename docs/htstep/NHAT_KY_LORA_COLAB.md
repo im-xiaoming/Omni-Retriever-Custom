@@ -242,3 +242,24 @@ Sửa:
 - Test `test_probe_plan` cập nhật. Local: **19 passed**.
 
 Ước lượng với K = 2 khi checkpointing bật: 25.51 × 1 352 / 3 600 = 9.6 giờ/epoch, tức khoảng 22.8 giờ cả lượt. Tắt checkpointing có thể nhanh hơn nữa; ô 4 sẽ đo.
+
+## 2026-11-05: ô 4 đo lại (commit `e1eb984`)
+
+Nguồn: log ô 4 trong `D:\Học\KL\log.md`. Bản cũ được đổi tên thành `*.json.old`. `protocol.json` mới có sha256 `246e35e9…`.
+
+| K | Checkpointing bật: reserved GB / s/bước | Checkpointing tắt: reserved GB / s/bước |
+| --- | --- | --- |
+| 1 | 19.16 / 46.69 | 22.58 / 31.26 |
+| 2 | 19.71 / 28.68 | **26.58 / 22.93** |
+| 4 | 21.25 / 26.75 | 36.05 / 24.00 |
+| 8 | 28.62 / 32.37 | OOM (38.93) |
+
+- **Chọn:** K = 2, checkpointing tắt, eval mỗi 1/4 epoch.
+  - 1 epoch khoảng 8.61 giờ; 1 lượt val khoảng 0.46 giờ (363.9 ms/item).
+  - Cả lượt tối đa khoảng **21.4 giờ**, so với 27.3 giờ theo luật cũ (K = 8): nhanh hơn khoảng 22 %.
+- **VRAM:** dùng 26.6 / 39.5 GB (67 %), còn khoảng 13 GB dự phòng cho batch nặng hơn 96 mẫu đã đo.
+- **Sai số đo:**
+  - Giữa hai lần đo, cùng cấu hình checkpointing bật lệch tới 10–20 % (K = 1: 38.9 so với 46.7 s), vì mỗi cấu hình chỉ tính giờ trên 2 bước.
+  - K2 tắt (22.9) và K4 tắt (24.0) gần như ngang nhau. Chọn K2 thì an toàn VRAM hơn.
+
+Không cần sửa code. Tiếp theo: ô 5 (mốc pt), rồi ô 6 (train).
