@@ -106,28 +106,39 @@ def load_video_frames(
         stream.thread_type = "AUTO"
         if timestamps is None:
             frames = [frame.to_ndarray(format="rgb24") for frame in container.decode(stream)]
+            idx = _sample_indices(len(frames), num_frames, sampling, path, timestamps)
         else:
-            frames = _decode_window(container, stream, *timestamps)
+            # Two passes over the window: count, then convert only the sampled
+            # frames. One pass held every frame at full resolution, which is
+            # tens of GB for a minutes-long HT-Step step; the frames picked are
+            # the same either way.
+            total = sum(1 for _ in _window_frames(container, stream, *timestamps))
+            idx = _sample_indices(total, num_frames, sampling, path, timestamps)
+            keep = set(idx.tolist())
+            frames = {i: frame.to_ndarray(format="rgb24")
+                      for i, frame in enumerate(_window_frames(container, stream, *timestamps))
+                      if i in keep}
 
-    total = len(frames)
+    return _resize_frames(np.stack([frames[i] for i in idx]), resolution)
+
+
+def _sample_indices(total, num_frames, sampling, path, timestamps) -> np.ndarray:
+    """Indices of the frames to keep out of ``total`` decoded ones."""
     if total == 0:
         window = "" if timestamps is None else f" within {timestamps[0]}-{timestamps[1]}s"
         raise RuntimeError(f"Video {path!r} has zero frames{window}.")
 
     if sampling == "uniform":
-        idx = np.linspace(0, total - 1, num=num_frames, dtype=int)
-    elif sampling == "random":
-        idx = np.sort(
+        return np.linspace(0, total - 1, num=num_frames, dtype=int)
+    if sampling == "random":
+        return np.sort(
             np.random.default_rng().choice(total, size=min(num_frames, total), replace=False)
         )
-    else:
-        raise ValueError(f"Unknown sampling strategy: {sampling!r}")
-
-    return _resize_frames(np.stack([frames[i] for i in idx]), resolution)
+    raise ValueError(f"Unknown sampling strategy: {sampling!r}")
 
 
-def _decode_window(container, stream, start: float, end: float) -> list[np.ndarray]:
-    """Decode only the frames presented between ``start`` and ``end`` seconds.
+def _window_frames(container, stream, start: float, end: float):
+    """Yield the frames presented between ``start`` and ``end`` seconds, not yet converted to RGB.
 
     Seeking lands on the keyframe at or before the target, never exactly on it,
     so the frames before ``start`` still have to be dropped by timestamp. The
@@ -140,7 +151,6 @@ def _decode_window(container, stream, start: float, end: float) -> list[np.ndarr
 
     container.seek(max(int(start / time_base), 0), stream=stream)
 
-    frames = []
     for frame in container.decode(stream):
         if frame.pts is None:
             continue
@@ -149,8 +159,7 @@ def _decode_window(container, stream, start: float, end: float) -> list[np.ndarr
             continue
         if seconds > end:
             break
-        frames.append(frame.to_ndarray(format="rgb24"))
-    return frames
+        yield frame
 
 
 def _resize_frames(frames: np.ndarray, resolution: int) -> np.ndarray:
