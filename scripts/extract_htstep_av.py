@@ -117,9 +117,7 @@ class TarLocator:
         self.tar_of[r["video_id"]] = tar
         self.scanned.add(tar)
 
-    def _scan(self, tar):
-        t = time.time()
-        rows = scan_tar(tar, self.repo)
+    def _store(self, tar, rows, seconds):
         new = not os.path.exists(self.cache_path)
         with open(self.cache_path, "a", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=INDEX_FIELDS)
@@ -129,7 +127,27 @@ class TarLocator:
         for r in rows:
             self._add(tar, r)
         self.scanned.add(tar)
-        print(f"  scanned {tar}: {len(rows)} mp4 in {time.time() - t:.0f} s", flush=True)
+        print(f"  scanned {tar}: {len(rows)} mp4 in {seconds:.0f} s", flush=True)
+
+    def _scan(self, tar):
+        t = time.time()
+        self._store(tar, scan_tar(tar, self.repo), time.time() - t)
+
+    def prefetch(self, video_ids, workers=16):
+        """Scan, in parallel, every tar these videos need (the manifest's tars and, for the videos it does not
+        name, the unlisted ones) that is not cached yet."""
+        from concurrent.futures import ThreadPoolExecutor
+
+        need = {self.tar_of[v] for v in video_ids if v in self.tar_of and v not in self.rows}
+        if any(v not in self.tar_of for v in video_ids):
+            need |= set(self.unlisted)
+        need = sorted(need - self.scanned)
+        if not need:
+            return
+        t = time.time()
+        with ThreadPoolExecutor(min(workers, len(need))) as ex:
+            for tar, rows in zip(need, ex.map(lambda x: scan_tar(x, self.repo), need)):
+                self._store(tar, rows, time.time() - t)
 
     def __contains__(self, video_id):
         if video_id not in self.tar_of:
@@ -196,6 +214,7 @@ def main():
 
     todo = [v for v in ids if not os.path.exists(os.path.join(a.out, f"{v}.npz"))]
     print(f"{len(ids)} ids, {len(ids) - len(todo)} already done, {len(todo)} to do", flush=True)
+    index.prefetch([v for v in todo if v in ann])
 
     from omniretriever import OmniRetriever
     model = OmniRetriever.from_pretrained(a.base_model, a.adapter, device=a.device, dtype=a.dtype)

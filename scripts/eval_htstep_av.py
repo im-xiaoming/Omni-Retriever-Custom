@@ -137,6 +137,7 @@ def main():
         ann = json.load(open(a.annotations, encoding="utf-8"))
         vids = sorted(v for v, d in ann.items() if d["subset"] == a.subset)
         src = VideoSource(a.index_cache or os.path.join(a.out, "_tar_index.csv"))
+        src.tars.prefetch([v for v in vids if v not in src.val])
         have = [v for v in vids if v in src]
         todo = [v for v in have if not os.path.exists(os.path.join(a.out, "videos", f"{v}.npz"))]
         print(f"{a.subset}: {len(vids)} videos, {len(have)} with an mp4, {len(todo)} to do", flush=True)
