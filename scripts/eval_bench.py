@@ -58,7 +58,8 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     adapter = a.adapter
     if a.lora:
-        sys.path.insert(0, os.path.join(REPO_ROOT, "training"))
+        # retrieval_eval imports omniretriever (src/) at module level, not only the training package
+        sys.path[:0] = [os.path.join(REPO_ROOT, "training"), os.path.join(REPO_ROOT, "src")]
         from qwenvl.train.retrieval_eval import materialize_adapter
         adapter = materialize_adapter(a.pt_adapter, a.lora, os.path.join(a.out, f"adapter_{a.tag}"))
     n = sum(1 for l in open(a.manifest, encoding="utf-8") if l.strip())
